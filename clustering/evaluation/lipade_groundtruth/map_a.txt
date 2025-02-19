@@ -1,0 +1,8 @@
+SIFT-absolute;0.175
+SIFT-proportional;0.174
+ResNet18-2;0.110
+ResNet18-3;0.194
+ResNet18-4;0.281
+ResNet50-2;0.100
+ResNet50-3;0.160
+ResNet50-4;0.282
