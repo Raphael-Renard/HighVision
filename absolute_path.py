@@ -1,0 +1,1 @@
+absolutePath = '/home/samuel-g/Documents/HighVision/highvision/'
