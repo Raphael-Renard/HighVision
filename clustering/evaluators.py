@@ -116,7 +116,7 @@ def goncalves_mAP(precisions_per_class, recalls_per_class):
         APs_per_class.append(np.trapezoid(precisions_per_class[:,i], x=recalls_per_class[:,i]))
     return np.mean(np.array(APs_per_class))
 
-def pr_curve(precisions, recalls, f1s = None, other = None):
+def pr_curve(precisions, recalls, f1s = None, other = None, save=None):
     AP = np.trapezoid(precisions, x=recalls)
     plt.plot(recalls, precisions)
     plt.xlim(0,1)
@@ -131,7 +131,12 @@ def pr_curve(precisions, recalls, f1s = None, other = None):
         plt.title('Precision Recall Curve\nAP = ' + "{:.3f}".format(AP) + '\n' + other[0] + ' = ' + "{:.3f}".format(other[1]))
     plt.xlabel('Recall')
     plt.ylabel('Precision')
-    plt.show()
+
+    if save:
+        plt.savefig(save)
+    else:
+        plt.show()
+
     if f1s is not None:
         return AP,best_threshold
     return AP,None
