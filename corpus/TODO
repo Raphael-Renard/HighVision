@@ -1,0 +1,1 @@
+Add a folder for each wanted corpus, using its "folder" argument in the corpus cartography (ex: "Groundtruth (LIPADE)" -> lipade_groundtruth/)
