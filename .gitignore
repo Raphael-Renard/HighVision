@@ -1,6 +1,8 @@
 # Custom
 corpus/*/*
+mini_corpus/*/*
 absolute_path.py
+data
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

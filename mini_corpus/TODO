@@ -1,0 +1,2 @@
+Add a folder for each wanted corpus using its "folder" argument in the corpus cartography (ex: "Groundtruth (LIPADE)" -> lipade_groundtruth/).
+It will be used for uniformized and reduced images.
