@@ -3,6 +3,8 @@ corpus/*/*
 mini_corpus/*/*
 absolute_path.py
 data
+degradations/datasets/crumpled_texture/*
+degradations/datasets/folded_texture/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

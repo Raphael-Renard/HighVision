@@ -17,10 +17,41 @@ Identification of image circulation in large collections of historical photograp
 ### Sur le vif
 ## 3- Data Retrieval
 ## 4- Layout Segmentation
-## 5- Representation
+## 5- Degradations
+### Overview
+Simulate various types of degradations commonly found in historical photographs and printed materials. 
+
+### Features
+- **Halftoning Techniques**:
+  - Atkinson dithering
+  - Floyd-Steinberg dithering
+  - Bayers threshold halftoning
+  - Dot-based halftoning
+- **Noise Addition**:
+  - Gaussian noise
+  - Salt-and-pepper noise
+  - film grain
+  - dirty rollers
+- **Paper Imperfections**:
+  - ink bleed
+  - crumpled paper effect
+  - folded paper effect
+  - scribbles
+  - stains
+  - bleedthrough
+  - two pictures overlaying
+  - scribbles
+- **Layout**
+  - two pictures overlaying
+  - text overlay
+- **Human made corrections**:
+  - object erased
+- **Pipeline Support**:
+  - Combine multiple degradations into a single simulation pipeline.
+## 6- Representation
 ### Image representation
 ### Multimodal representation
-## 6- Clustering
+## 7- Clustering
 ### Generation of clusters
 ### Evaluation of clusters
-## 7- Circulation
+## 8- Circulation
