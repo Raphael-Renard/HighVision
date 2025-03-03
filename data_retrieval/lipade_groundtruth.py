@@ -7,13 +7,16 @@ import os
 import pandas as pd
 from absolute_path import absolutePath
 
-def getDataset(mode, check=False):
+def getDataset(mode, check=False, uniform=False):
+    corpusFolder = 'mini_corpus/' if uniform else 'corpus/'
+
     # Paths
-    corpusPath = absolutePath + 'corpus/lipade_groundtruth/'
+    corpusPath     = absolutePath + corpusFolder + 'lipade_groundtruth/'
+    trueCorpusPath = absolutePath + 'corpus/'    + 'lipade_groundtruth/'
 
     similarPath = os.path.join(corpusPath, 'similar/')
-    uniquePath = os.path.join(corpusPath, 'unique/')
-    groundtruthPath = os.path.join(corpusPath, 'groundtruth.xlsx')
+    uniquePath  = os.path.join(corpusPath, 'unique/')
+    groundtruthPath = os.path.join(trueCorpusPath, 'groundtruth.xlsx')
 
     paths = []
     labels = []
