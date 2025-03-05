@@ -1,18 +1,21 @@
 import numpy as np
 import cv2
-import os
+import torch.nn as nn
+import torch
 
 def floyd_steinberg_halftoning(image, block_size=8):
     """
     Applies Floyd-Steinberg error diffusion halftoning with enhanced visibility for a newspaper-style effect.
 
     Args:
-        image (numpy.ndarray): Grayscale input image.
+        image (numpy.ndarray): RGB input image.
         block_size (int): Size of the grid for coarser halftone visibility.
 
     Returns:
         numpy.ndarray: Halftoned binary image.
     """
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
     # Ensure the image is a NumPy array and in float format for processing
     image = image.astype(np.float32)
     height, width = image.shape
@@ -45,17 +48,24 @@ def floyd_steinberg_halftoning(image, block_size=8):
                         block[y + 1, x] += error * (5 / 16)  # Bottom-center
                         if x + 1 < block.shape[1]:  # Bottom-right
                             block[y + 1, x + 1] += error * (1 / 16)
-
+    halftoned_image = cv2.cvtColor(halftoned_image,cv2.COLOR_GRAY2RGB)
     return halftoned_image
 
 
-import torch.nn as nn
+
 class transforms_floyd_steinberg_halftoning(nn.Module):
     def __init__(self, block_size=8):
         super(transforms_floyd_steinberg_halftoning, self).__init__()
         self.block_size=block_size
 
     def __call__(self, batch):
-        for image in batch:
-            image = floyd_steinberg_halftoning(image, self.block_size)
-        return batch
+        results = torch.empty_like(batch)
+        for i, image in enumerate(batch):
+            image_array = np.array(image).swapaxes(0,2) * 255
+            mask = np.where(image_array==0)
+            image = floyd_steinberg_halftoning(image_array, self.block_size)
+            image[mask] = 0
+            image = np.array(image).swapaxes(0,2)
+            image = torch.tensor(image)
+            results[i] = image / 255
+        return results

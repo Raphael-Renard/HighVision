@@ -2,6 +2,14 @@ import cv2
 import numpy as np
 import random
 import glob
+import os
+import sys
+import torch.nn as nn
+import torch
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../..')))
+from absolute_path import absolutePath
+#absolutePath = 'C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/'
 
 
 # --- Method 1: draw fold lines on the paper ---
@@ -52,23 +60,8 @@ def generate_fold_lines(shape, num_folds=3, thickness=2, intensity=60, num_creas
         points = [(x, y + random.randint(-1, 1)) for x in range(0, width, 10)]
         points = np.array(points, np.int32).reshape((-1, 1, 2))
         cv2.polylines(fold_pattern, [points], isClosed=False, color=256, thickness=1)
-    """
-    # Add random crumples
-    for _ in range(num_creases):
-        x1, y1 = random.randint(0, width), random.randint(0, height)
-        x2, y2 = x1 + random.randint(-width//4, width//4), y1 + random.randint(-height//4, height//4)
-        points_1 = [(x1 + random.randint(-1, 1), y1) for y1 in range(0, height, 10)]
-        points_1 = np.array(points_1, np.int32).reshape((-1, 1, 2))
-        points_2 = [(x2,y2 + random.randint(-1, 1)) for x2 in range(0, width, 10)]
-        points_2 = np.array(points_2, np.int32).reshape((-1, 1, 2))
-        
-        cv2.polylines(fold_pattern, [points_1], 128 - intensity, thickness//2)
-        cv2.polylines(fold_pattern, [points_2], 128 - intensity, thickness//2)
-    """
+   
     fold_pattern = cv2.bitwise_not(fold_pattern)
-    
-    #noise = np.random.normal(0,15, (height, width)).astype(np.uint8)
-    #fold_pattern = cv2.subtract(fold_pattern, noise)
     return fold_pattern
 
 
@@ -97,7 +90,7 @@ def fold_effect(img, num_folds=2, thickness=2, intensity=80):
 
 
 
-# --- Method 2: apply a texture from a random crumpled paper image ---
+# --- Method 2: apply a texture from a random folded paper image ---
 
 def folded_paper(img, intensity = 0.4):
     """
@@ -106,7 +99,7 @@ def folded_paper(img, intensity = 0.4):
     # grey image
     gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-    texture_files = glob.glob("../datasets/folded_texture/*")
+    texture_files = glob.glob(absolutePath+"degradations/datasets/folded_texture/*")
     texture_path = np.random.choice(texture_files)    
     texture_path = texture_path.replace("\\", "/")
     texture = cv2.imdecode(np.fromfile(texture_path, np.uint8), cv2.IMREAD_GRAYSCALE)
@@ -115,20 +108,28 @@ def folded_paper(img, intensity = 0.4):
     texture = cv2.resize(texture, (img.shape[1], img.shape[0]))
  
     # Blend using multiply
-    blended = cv2.addWeighted(gray_img,(1-intensity),texture,intensity,0)
+    blended = cv2.addWeighted(gray_img.astype(np.uint8),(1-intensity),texture.astype(np.uint8),intensity,0)
+
+    blended = cv2.cvtColor(blended,cv2.COLOR_GRAY2RGB)
     return blended
 
 
-import torch.nn as nn
 class transforms_folded_paper(nn.Module):
-    def __init__(self, intensity=10):
+    def __init__(self, intensity=0.4):
         super(transforms_folded_paper, self).__init__()
         self.intensity = intensity
 
     def __call__(self, batch):
-        for image in batch:
-            image = folded_paper(image, intensity=self.intensity)
-        return batch
+        results = torch.empty_like(batch)
+        for i, image in enumerate(batch):
+            image_array = np.array(image).swapaxes(0,2) * 255
+            mask = np.where(image_array==0)
+            image = folded_paper(image_array, intensity=self.intensity)
+            image[mask]=0
+            image = np.array(image).swapaxes(0,2)
+            image = torch.tensor(image) / 255
+            results[i] = image
+        return results
 
 
 

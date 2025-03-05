@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
-import os
+import torch.nn as nn
+import torch
 
 def generate_bayer_matrix(n):
     """
@@ -28,12 +29,13 @@ def bayer_halftoning(image, cell_size=4):
     Applies basic halftoning using a Bayer threshold matrix.
 
     Args:
-        image (numpy.ndarray): Grayscale input image.
+        image (numpy.ndarray): BGR input image.
         cell_size (int): Size of each halftoning cell.
 
     Returns:
         numpy.ndarray: Halftoned binary image.
     """
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     image = image.astype(np.float32)
     height, width = image.shape
 
@@ -57,17 +59,25 @@ def bayer_halftoning(image, cell_size=4):
 
             # Place the thresholded cell in the output image
             halftoned_image[y:y + cell_size, x:x + cell_size] = thresholded_cell
-
+    
+    halftoned_image = cv2.cvtColor(halftoned_image,cv2.COLOR_GRAY2RGB)
+    #halftoned_image = halftoned_image.repeat((3,1,1))
     return halftoned_image
 
 
-import torch.nn as nn
+
 class transforms_bayer_halftoning(nn.Module):
     def __init__(self, cell_size=4):
         super(transforms_bayer_halftoning, self).__init__()
         self.cell_size=cell_size
 
     def __call__(self, batch):
-        for image in batch:
-            image = bayer_halftoning(image, self.cell_size)
-        return batch
+        results = torch.empty_like(batch)
+        for i, image in enumerate(batch):
+            image_array = np.array(image).swapaxes(0,2) * 255
+            mask = np.where(image_array==0)
+            image_half = bayer_halftoning(image_array, self.cell_size)
+            image_half[mask] = 0
+            image_half = image_half.swapaxes(0,2)
+            results[i] = torch.tensor(image_half)/255
+        return results

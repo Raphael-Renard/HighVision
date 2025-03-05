@@ -1,6 +1,6 @@
 import numpy as np
-import cv2
-import os
+import torch.nn as nn
+import torch
 
 def add_salt_and_pepper_noise(image, probability=0.01):
     """
@@ -29,13 +29,20 @@ def add_salt_and_pepper_noise(image, probability=0.01):
     return noisy_image
 
 
-import torch.nn as nn
+
 class transforms_add_salt_and_pepper_noise(nn.Module):
     def __init__(self, probability=0.01):
         super(transforms_add_salt_and_pepper_noise, self).__init__()
         self.probability = probability
 
     def __call__(self, batch):
-        for image in batch:
-            image = add_salt_and_pepper_noise(image, self.probability)
-        return batch
+        results = torch.empty_like(batch)
+        for i, image in enumerate(batch):
+            image_array = np.array(image).swapaxes(0,2) * 255
+            mask = np.where(image_array==0)
+            image = add_salt_and_pepper_noise(image_array, self.probability)
+            image[mask]=0
+            image = np.array(image).swapaxes(0,2)
+            image = torch.tensor(image)
+            results[i] = image / 255
+        return results

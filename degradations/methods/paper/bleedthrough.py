@@ -1,6 +1,8 @@
 import cv2
 from augraphy import *
 import numpy as np
+import torch.nn as nn
+import torch
 
 def bleedthrough_augraphy(img,alpha=0.3):
     """
@@ -29,7 +31,7 @@ def bleedthrough(img, img2=None, alpha=0.3):
         img2: the image on the other side of the paper
         alpha: intensity of the bleedthrough
     """
-    if img2 == None:
+    if img2 is None:
         img2 = img.copy()
     
     if len(img.shape)==3:
@@ -37,7 +39,7 @@ def bleedthrough(img, img2=None, alpha=0.3):
     if len(img2.shape)==3:
         img2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
 
-    # resize
+    # resize img2
     if img.shape[0] <= img2.shape[0]:
         img2 = img2[:img.shape[0]]
     else:
@@ -72,19 +74,27 @@ def bleedthrough(img, img2=None, alpha=0.3):
     # delete the white bleedthrough
     blended[index_white] = img[index_white]
 
+    blended = cv2.cvtColor(blended,cv2.COLOR_GRAY2BGR)
     return blended
 
 
-import torch.nn as nn
+
 class transforms_bleedthrough(nn.Module):
     def __init__(self, alpha=0.3):
         super(transforms_bleedthrough, self).__init__()
         self.alpha = alpha
 
     def __call__(self, batch):
-        for image in batch:
-            image = bleedthrough(image, alpha=self.alpha)
-        return batch
+        results = torch.empty_like(batch)
+        for i, image in enumerate(batch):
+            image_array = np.array(image).swapaxes(0,2) * 255
+            mask = np.where(image_array==0)
+            image = bleedthrough(image_array, alpha=self.alpha)
+            image[mask]=0
+            image = np.array(image).swapaxes(0,2)
+            image = torch.tensor(image) / 255
+            results[i] = image
+        return results
 
 
 if __name__ == "__main__":

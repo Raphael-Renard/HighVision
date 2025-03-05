@@ -1,23 +1,29 @@
 import cv2
 import numpy as np
+import torch.nn as nn
+import torch
 
-def picture_overlay(img, img2=None):
-    "Add part of another picture in the corner of the image"
+def picture_overlay(img, img2=None, thickness=None):
+    """
+    Add part of another picture in the corner of the image
+    thickness (int): the two images will be separated by a white line of this thickness
+    """
 
-    if img2 == None:
+    if img2 is None:
         img2 = img.copy()
 
     img_copy = img.copy()
 
     # corner of the second image to overlay
-    ratio_height, ratio_width = np.random.uniform(0.2, 0.5),np.random.uniform(0.2, 0.5) # part of the corner of the second picture to overlay
+    ratio_height, ratio_width = np.random.uniform(0.4, 0.5),np.random.uniform(0.4, 0.5) # part of the corner of the second picture to overlay
     half_height, half_width = img2.shape[0] // 2, img2.shape[1] // 2
     corner_height, corner_width = int(half_height*ratio_height), int(half_width*ratio_width)
 
     # pick a corner of the first image at random (where the second image will be overlayed)
     corner = np.random.randint(0, 4)
 
-    thickness = max(img.shape[0], img.shape[1]) // 150 # separate the two images with a white line of this thickness
+    if thickness is None:
+        thickness = max(img.shape[0], img.shape[1]) // 150
 
 
     cut_corner = np.random.randint(0, 2) # is the corner of the second image cut or not
@@ -52,7 +58,7 @@ def picture_overlay(img, img2=None):
 
         if cut_corner == 1:
             img[cut_height:corner_height, img.shape[1] - corner_width:img.shape[1] - cut_width] = img_copy[cut_height:corner_height, img.shape[1] - corner_width:img.shape[1] - cut_width]
-
+            
             # add a white line to separate the two images
             cv2.line(img, (img.shape[1] - cut_width, cut_height), (img.shape[1] - corner_width, cut_height), (255, 255, 255), thickness)
             cv2.line(img, (img.shape[1] - cut_width, cut_height), (img.shape[1] - cut_width, corner_height), (255, 255, 255), thickness)
@@ -104,27 +110,37 @@ def picture_overlay(img, img2=None):
 
 
 
-import torch.nn as nn
+
 class transforms_picture_overlay(nn.Module):
-    def __init__(self):
+    def __init__(self, thickness=3):
         super(transforms_picture_overlay, self).__init__()
+        self.thickness = thickness
 
     def __call__(self, batch):
-        for image in batch:
-            image = picture_overlay(image)
-        return batch
+        results = torch.empty_like(batch)
+        
+        for i, image in enumerate(batch):
+            image_array = np.transpose(np.array(image), (1, 2, 0)).copy() * 255
+            image_array = image_array.astype(np.uint8)
+
+            image = picture_overlay(image_array, thickness = self.thickness)
+            
+            image = np.transpose(image, (2, 0, 1))
+            image = torch.tensor(image)
+            results[i] = image / 255
+        return results
 
 
 
 
 if __name__ == "__main__":
-    path = "degradations/datasets/original/"
-    img = cv2.imread(path+"FRAN_0568_000183_L.jpg")
-    img2 = cv2.imread(path+"/FRAN_0568_000220_L.jpg")
-    img = picture_overlay(img, img2)
+    path = "corpus/lipade_groundtruth/unique/"
+    img = cv2.imread(path+"2K2476_02_01.jpg")
+    #img2 = cv2.imread(path+"2K2476_02_02.jpg")
+    img = picture_overlay(img)
 
     # resize image for better visualization
-    scale_percent = 10 # percent of original size
+    scale_percent = 15 # percent of original size
     width = int(img.shape[1] * scale_percent / 100)
     height = int(img.shape[0] * scale_percent / 100)
     dim = (width, height)

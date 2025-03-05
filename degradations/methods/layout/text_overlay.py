@@ -2,11 +2,18 @@ import cv2
 import numpy as np
 import random
 import string
+import torch
+import torch.nn as nn
 
-def text_overlay(img):
+
+def text_overlay(img, font_size_1=None):
     """
     Add two lines of random black text on a white rectangle in one corner or at the top of the image
+    font_size_1 (int): size of the first line of text
+    length_txt1 (int): number of characters in the first line of the text
+    length_txt2 (int): number of characters in the second line of the text
     """
+
     # pick a corner of the image at random (where the text will be)
     corner = np.random.randint(0, 5)
 
@@ -20,17 +27,27 @@ def text_overlay(img):
     border = img.shape[0]//30
 
     # text
-    font_size_1 = corner_height//85
+    if font_size_1 is None:
+        font_size_1 = corner_height//85
+
+        if corner==4: # top center
+            length_txt1 = (img.shape[1]-2*corner_width)//400
+            length_txt2 = (img.shape[1]-2*corner_width)//250
+        else: # corner
+            length_txt1 = corner_width//400
+            length_txt2 = corner_width//200
+    else:
+        length_txt1 = corner_width//20
+        length_txt2 = corner_width//20
+
     thickness_1 = 3*font_size_1
     font_size_2 = font_size_1//2
     thickness_2 = 4*font_size_2
 
-    if corner==4: # top center
-        length_txt1 = (img.shape[1]-2*corner_width)//400
-        length_txt2 = (img.shape[1]-2*corner_width)//250
-    else: # corner
-        length_txt1 = corner_width//400
-        length_txt2 = corner_width//200
+    if font_size_2==0:
+        font_size_2 = 1
+        thickness_2 = font_size_2
+    
 
     text1 = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase) for _ in range(length_txt1)).strip()
     text2 = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase) for _ in range(length_txt2)).strip()
@@ -41,9 +58,9 @@ def text_overlay(img):
         img[0:corner_height, 0:corner_width] = 255
 
         # write random text in the white rectangle
-        cv2.putText(img,text1,(0,corner_height//3+ border//2),
+        cv2.putText(img,text1,(0,corner_height//3 + border),
                     cv2.FONT_HERSHEY_COMPLEX,font_size_1,(0,0,0),thickness_1,cv2.LINE_AA)
-        cv2.putText(img,text2,(0,2*corner_height//3),
+        cv2.putText(img,text2,(0,2*corner_height//3 + border),
                     cv2.FONT_HERSHEY_COMPLEX,font_size_2,(0,0,0),thickness_2,cv2.LINE_AA)
 
         
@@ -51,9 +68,9 @@ def text_overlay(img):
         img[0:corner_height, img.shape[1] - corner_width:img.shape[1]] = 255
 
         # write random text in the white rectangle
-        cv2.putText(img,text1,(img.shape[1] - corner_width + border, corner_height//3+ border//2),
+        cv2.putText(img,text1,(img.shape[1] - corner_width + border, corner_height//3 + border),
                     cv2.FONT_HERSHEY_COMPLEX,font_size_1,(0,0,0),thickness_1,cv2.LINE_AA)
-        cv2.putText(img,text2,(img.shape[1] - corner_width + border*2, 2*corner_height//3),
+        cv2.putText(img,text2,(img.shape[1] - corner_width + border*2, 2*corner_height//3 + border),
                     cv2.FONT_HERSHEY_COMPLEX,font_size_2,(0,0,0),thickness_2,cv2.LINE_AA)
 
      
@@ -61,9 +78,9 @@ def text_overlay(img):
         img[img.shape[0] - corner_height:img.shape[0], img.shape[1] - corner_width:img.shape[1]] = 255
 
         # write random text in the white rectangle
-        cv2.putText(img,text1,(img.shape[1] - corner_width + border, img.shape[0] - corner_height + corner_height//3 + border//2),
+        cv2.putText(img,text1,(img.shape[1] - corner_width + border, img.shape[0] - corner_height + corner_height//3 + border),
                     cv2.FONT_HERSHEY_COMPLEX,font_size_1,(0,0,0),thickness_1,cv2.LINE_AA)
-        cv2.putText(img,text2,(img.shape[1] - corner_width + border*2, img.shape[0] - corner_height + 2*corner_height//3),
+        cv2.putText(img,text2,(img.shape[1] - corner_width + border*2, img.shape[0] - corner_height + 2*corner_height//3 + border),
                     cv2.FONT_HERSHEY_COMPLEX,font_size_2,(0,0,0),thickness_2,cv2.LINE_AA)
 
 
@@ -71,39 +88,46 @@ def text_overlay(img):
         img[img.shape[0] - corner_height:img.shape[0], 0:corner_width] = 255
 
         # write random text in the white rectangle
-        cv2.putText(img,text1,(0,img.shape[0] - corner_height + corner_height//3 + border//2),
+        cv2.putText(img,text1,(0,img.shape[0] - corner_height + corner_height//3 + border),
                     cv2.FONT_HERSHEY_COMPLEX,font_size_1,(0,0,0),thickness_1,cv2.LINE_AA)
-        cv2.putText(img,text2,(0,img.shape[0] - corner_height+ 2*corner_height//3),
+        cv2.putText(img,text2,(0,img.shape[0] - corner_height+ 2*corner_height//3 + border),
                     cv2.FONT_HERSHEY_COMPLEX,font_size_2,(0,0,0),thickness_2,cv2.LINE_AA)
     
     else: # center
         img[0:corner_height, corner_width : img.shape[1] - corner_width] = 255
 
         # write random text in the white rectangle
-        cv2.putText(img,text1,(corner_width + border, corner_height//3+ border//2),
+        cv2.putText(img,text1,(corner_width + border, corner_height//3+ border),
                     cv2.FONT_HERSHEY_COMPLEX,font_size_1,(0,0,0),thickness_1,cv2.LINE_AA)
-        cv2.putText(img,text2,(corner_width + border*2, 2*corner_height//3),
+        cv2.putText(img,text2,(corner_width + border*2, 2*corner_height//3 + border),
                     cv2.FONT_HERSHEY_COMPLEX,font_size_2,(0,0,0),thickness_2,cv2.LINE_AA)
 
     return img
 
 
-import torch.nn as nn
+
+
 class transforms_text_overlay(nn.Module):
-    def __init__(self):
+    def __init__(self, font_size_1=1):
         super(transforms_text_overlay, self).__init__()
+        self.font_size_1 = font_size_1
 
     def __call__(self, batch):
-        for image in batch:
-            image = text_overlay(image)
-        return batch
+        results = torch.empty_like(batch)
+        for i, image in enumerate(batch):
+            image_array = np.transpose(np.array(image), (1, 2, 0)).copy() * 255
+            image = text_overlay(image_array, self.font_size_1) 
+            image = np.transpose(image, (2, 0, 1))
+            image = torch.tensor(image) / 255
+            results[i] = image
+        return results
 
 
 
 
 if __name__ == "__main__":
-    path = "degradations/datasets/original/"
-    img = cv2.imread(path+"FRAN_0568_000020_L.jpg")
+    path = "corpus/lipade_groundtruth/unique/"
+    img = cv2.imread(path+"2K2476_02_01.jpg")
     img = text_overlay(img)
 
     # resize image for better visualization

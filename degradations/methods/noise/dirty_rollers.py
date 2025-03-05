@@ -1,5 +1,8 @@
 import cv2
 from augraphy import*
+import torch.nn as nn
+import torch
+import numpy as np
 
 def dirty_rollers(img, line_width_range=(12, 25)):
     dirty_roller = DirtyRollers(line_width_range=line_width_range,
@@ -10,16 +13,23 @@ def dirty_rollers(img, line_width_range=(12, 25)):
     return img_dirty_rollers
 
 
-import torch.nn as nn
+
 class transforms_dirty_rollers(nn.Module):
     def __init__(self, line_width_range = (12, 25)):
         super(transforms_dirty_rollers, self).__init__()
         self.line_width_range = line_width_range
 
     def __call__(self, batch):
-        for image in batch:
-            image = dirty_rollers(image, self.line_width_range)
-        return batch
+        results = torch.empty_like(batch)
+        for i, image in enumerate(batch):
+            image_array = np.array(image).swapaxes(0,2) * 255
+            mask = np.where(image_array==0)
+            image = dirty_rollers(image_array, self.line_width_range)
+            image[mask] = 0
+            image = np.array(image).swapaxes(0,2)
+            image = torch.tensor(image)
+            results[i] = image / 255
+        return results
 
 
 

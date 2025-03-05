@@ -1,6 +1,6 @@
 import numpy as np
-import cv2
-import os
+import torch.nn as nn
+import torch
 
 def add_gaussian_noise(image, mean=0, stddev=25):
     """
@@ -29,7 +29,7 @@ def add_gaussian_noise(image, mean=0, stddev=25):
     return noisy_image.astype(np.uint8)
 
 
-import torch.nn as nn
+
 class transforms_add_gaussian_noise(nn.Module):
     def __init__(self, mean=0, stddev=25):
         super(transforms_add_gaussian_noise, self).__init__()
@@ -37,6 +37,12 @@ class transforms_add_gaussian_noise(nn.Module):
         self.stddev=stddev
 
     def __call__(self, batch):
-        for image in batch:
-            image = add_gaussian_noise(image, self.mean, self.stddev)
-        return batch
+        results = torch.empty_like(batch)
+        for i, image in enumerate(batch):
+            image_array = np.array(image) * 255
+            mask = np.where(image_array==0)
+            image = add_gaussian_noise(image_array, self.mean, self.stddev)
+            image[mask]=0
+            image = torch.tensor(image)
+            results[i] = image / 255
+        return results
