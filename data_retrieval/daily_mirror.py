@@ -9,16 +9,19 @@ from tools.british_newspaper_archive_retrieval import britishNewspaperArchiveExp
 import datetime
 
 # Scrapping
-def downloadDataset(mode = 2):
+def downloadDataset(mode = 0):
     issuesRetrieval = mode == 0
     pagesRetrieval = mode == 1
     download = mode == 2
 
     corpusPath = absolutePath + 'corpus/daily_mirror/'
-    explorer = britishNewspaperArchiveExplorer("daily mirror", 1914, 1920)
+    explorer = britishNewspaperArchiveExplorer("daily mirror", 1914, 1920, corpusPath + "bna_downloads/")
 
     if issuesRetrieval:
-        explorer.getIssues()
+        with open("corpus/daily_mirror/bna_download_index.txt") as f:
+            startIndex = int(f.readline())
+
+        explorer.getIssues(startIndex, "corpus/daily_mirror/bna_issue_index.txt")
         with open("corpus/daily_mirror/bna_issues.txt", "w") as f:
             for href in explorer.issues:
                 f.write(href + "\n")
@@ -33,17 +36,13 @@ def downloadDataset(mode = 2):
                 f.write(href + "\n")
 
     if download:
-        with open("corpus/daily_mirror/bna_download_index.txt") as f:
-            startIndex = int(f.readline())
-        explorer.getPdf("corpus/daily_mirror/bna_downloads/", "corpus/daily_mirror/bna_pages.txt", startIndex, "corpus/daily_mirror/bna_download_index.txt")
+        startIndex = len(os.listdir(os.path.join(absolutePath, corpusPath + "bna_downloads/")))
+        explorer.getPdf("corpus/daily_mirror/bna_pages.txt", startIndex, "corpus/daily_mirror/bna_download_index.txt")
 
 # Retrieval
 def getDataset():
     # Paths
-    corpusPath = absolutePath + 'corpus/lipade_groundtruth/'
-
-    imagesPath = os.path.join(corpusPath, 'images/')
-    groundtruthPath = os.path.join(corpusPath, 'groundtruth.xlsx')
+    corpusPath = absolutePath + 'corpus/lipade_groundtruth/bna_downloads/'
 
     # Load
     paths = []
@@ -58,6 +57,6 @@ def getDataset():
 
 # Display
 if __name__ == '__main__':
-    downloadDataset()
+    downloadDataset(2)
     # x,_,_ = getDataset()
     # print(len(x), 'images')
