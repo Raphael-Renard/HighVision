@@ -17,3 +17,5 @@ clip_transfer_vitb32,0.270
 clip_transfer_vitl14_336p,0.251
 clip_transfer_vitl14,0.244
 clip_transfer_resnet50x16,0.242
+simclr_classique_loss1,0.137
+simclr_fei_loss2,0.105
