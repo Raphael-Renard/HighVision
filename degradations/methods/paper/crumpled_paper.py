@@ -3,13 +3,15 @@ import numpy as np
 import torch.nn as nn
 import torch
 from noise import pnoise2  # Perlin noise
+import glob
 
 import sys
 import os
-
+"""
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../..')))
 from absolute_path import absolutePath
-
+"""
+absolutePath = 'C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/'
 
 #absolutePath = 'C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/'
 
@@ -37,7 +39,42 @@ def generate_perlin_noise(shape, scale=200, octaves=3):
     return noise_img.astype(np.uint8)
 
 
-import glob
+
+def apply_texture2(cible):
+    texture_files = glob.glob(absolutePath+"degradations/datasets/crumpled_texture/*")
+    texture_path = np.random.choice(texture_files)    
+    texture_path = texture_path.replace("\\", "/")
+    texture = cv2.imdecode(np.fromfile(texture_path, np.uint8), cv2.IMREAD_GRAYSCALE)
+
+    # Transformer en spectre de fréquence (FFT)
+    dft = cv2.dft(np.float32(texture), flags=cv2.DFT_COMPLEX_OUTPUT)
+    dft_shift = np.fft.fftshift(dft)
+
+    # Supprimer les basses fréquences pour isoler la texture
+    rows, cols = texture.shape
+    mask = np.ones((rows, cols, 2), np.uint8)
+    mask[rows//2-30:rows//2+30, cols//2-30:cols//2+30] = 0
+    dft_shift = dft_shift * mask
+
+    # Revenir à l'espace temporel
+    f_ishift = np.fft.ifftshift(dft_shift)
+    texture_filtered = cv2.idft(f_ishift)
+    texture_filtered = cv2.magnitude(texture_filtered[:, :, 0], texture_filtered[:, :, 1])
+
+    # Normaliser la texture filtrée
+    texture_filtered = cv2.normalize(texture_filtered, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
+
+    # Redimensionner pour correspondre à l'image cible
+    texture_resized = cv2.resize(texture_filtered, (cible.shape[1], cible.shape[0]))
+
+    # Mélanger les images
+    alpha = 0.5  # Intensité de la texture
+    result = cv2.addWeighted(cible, 1 - alpha, texture_resized, alpha, 0)
+    #mean_color = (cible - texture_resized).mean()*alpha
+    #print(int(mean_color))
+    #result += int(mean_color)
+    return result.clip(0,255)
+
 
 def apply_texture(img):
     """Blends a folded paper texture onto an image."""
@@ -47,10 +84,11 @@ def apply_texture(img):
     texture = cv2.imdecode(np.fromfile(texture_path, np.uint8), cv2.IMREAD_GRAYSCALE)
 
     # Resize texture to match image size
-    texture = cv2.resize(texture, (img.shape[1], img.shape[0]))
- 
-    # Blend using multiply (darker paper effect)
-    blended = cv2.addWeighted(img.astype(np.uint8),0.7,texture.astype(np.uint8),0.3,0)
+    texture = (255 - cv2.resize(texture, (img.shape[1], img.shape[0])))*2
+
+    # Blend using multiply
+    #blended = cv2.multiply(img.astype(np.float32) / 255.0, texture.astype(np.float32) / 255.0) *255
+    blended = cv2.addWeighted(img.astype(np.uint8),0.8,texture.astype(np.uint8),0.2,0)
     return blended
 
 def crumpled_paper(img, intensity_waves=10, intensity_blend=0.1):
@@ -85,13 +123,13 @@ def crumpled_paper(img, intensity_waves=10, intensity_blend=0.1):
     crumpled_gray = cv2.remap(gray_img, map_x, map_y, interpolation=cv2.INTER_LINEAR)
 
     # Blend original with Perlin noise
-    crumpled_final = cv2.addWeighted(crumpled_gray, (1-intensity_blend), noise_map.astype(np.float32), intensity_blend, 0)
-    crumpled_final= apply_texture(crumpled_final)
+    crumpled_final = cv2.addWeighted(crumpled_gray.astype(np.uint8), (1-intensity_blend), noise_map.astype(np.uint8), intensity_blend, 0)
+    crumpled_final= apply_texture2(crumpled_final)
 
     # reconvert to RGB
     crumpled_final = cv2.cvtColor(crumpled_final,cv2.COLOR_GRAY2RGB)
-    #crumpled_final = crumpled_final.repeat((3,1,1))
     return crumpled_final
+
 
 
 
@@ -116,7 +154,7 @@ class transforms_crumpled_paper(nn.Module):
         return results
 
 
-
+"""
 if __name__ == "__main__":
     # Example usage
     path = "degradations/datasets/original/"
@@ -126,3 +164,13 @@ if __name__ == "__main__":
     cv2.imshow("Crumpled Paper Effect", crumpled_img)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+"""
+
+if __name__ =="__main__":
+    image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/degradations/results/2K2476_16_01.jpg"
+    #image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/Data/Sena/FRAN_0568_11AR_699/FRAN_0568_000014_L.jpg"
+    img = cv2.imread(image_path)
+    img = crumpled_paper(img).astype(np.uint8)
+    cv2.imshow("crumpled",img)
+    cv2.waitKey(0)
+    #cv2.imwrite("crumpled.jpg",img)

@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch
 import numpy as np
 
-def dirty_rollers(img, line_width_range=(12, 25)):
+def dirty_rollers(img, line_width_range=(25, 35)):
     dirty_roller = DirtyRollers(line_width_range=line_width_range,
                                 scanline_type=0,
                                 )
@@ -15,7 +15,7 @@ def dirty_rollers(img, line_width_range=(12, 25)):
 
 
 class transforms_dirty_rollers(nn.Module):
-    def __init__(self, line_width_range = (12, 25)):
+    def __init__(self, line_width_range = (8, 10)):
         super(transforms_dirty_rollers, self).__init__()
         self.line_width_range = line_width_range
 
@@ -32,7 +32,7 @@ class transforms_dirty_rollers(nn.Module):
         return results
 
 
-
+"""
 if __name__ == "__main__":
     path = "degradations/datasets/original/"
     img = cv2.imread(path+"FRAN_0568_000020_L.jpg")
@@ -49,3 +49,12 @@ if __name__ == "__main__":
     cv2.imshow("dirty rollers", img)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+"""
+
+    
+if __name__ =="__main__":
+    image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/degradations/results/2K2476_16_01.jpg"
+    #image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/Data/Sena/FRAN_0568_11AR_699/FRAN_0568_000014_L.jpg"
+    img = cv2.imread(image_path)
+    img = dirty_rollers(img,(8,10))
+    cv2.imwrite("dirty_rollers.jpg",img)

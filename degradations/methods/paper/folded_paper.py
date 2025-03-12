@@ -7,9 +7,9 @@ import sys
 import torch.nn as nn
 import torch
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../..')))
-from absolute_path import absolutePath
-#absolutePath = 'C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/'
+#sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../..')))
+#from absolute_path import absolutePath
+absolutePath = 'C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/'
 
 
 # --- Method 1: draw fold lines on the paper ---
@@ -114,6 +114,42 @@ def folded_paper(img, intensity = 0.4):
     return blended
 
 
+def folded_paper2(cible):
+    cible = cv2.cvtColor(cible, cv2.COLOR_BGR2GRAY)
+    texture_files = glob.glob(absolutePath+"degradations/datasets/folded_texture/*")
+    texture_path = np.random.choice(texture_files)    
+    texture_path = texture_path.replace("\\", "/")
+    texture = cv2.imdecode(np.fromfile(texture_path, np.uint8), cv2.IMREAD_GRAYSCALE)
+
+    # Transformer en spectre de fréquence (FFT)
+    dft = cv2.dft(np.float32(texture), flags=cv2.DFT_COMPLEX_OUTPUT)
+    dft_shift = np.fft.fftshift(dft)
+
+    # Supprimer les basses fréquences pour isoler la texture
+    rows, cols = texture.shape
+    mask = np.ones((rows, cols, 2), np.uint8)
+    mask[rows//2-30:rows//2+30, cols//2-30:cols//2+30] = 0
+    dft_shift = dft_shift * mask
+
+    # Revenir à l'espace temporel
+    f_ishift = np.fft.ifftshift(dft_shift)
+    texture_filtered = cv2.idft(f_ishift)
+    texture_filtered = cv2.magnitude(texture_filtered[:, :, 0], texture_filtered[:, :, 1])
+
+    # Normaliser la texture filtrée
+    texture_filtered = cv2.normalize(texture_filtered, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
+
+    # Redimensionner pour correspondre à l'image cible
+    texture_resized = cv2.resize(texture_filtered, (cible.shape[1], cible.shape[0]))
+
+    # Mélanger les images
+    alpha = 0.5  # Intensité de la texture
+    result = cv2.addWeighted(cible, 1 - alpha, texture_resized, alpha, 0)
+
+    return result
+
+
+
 class transforms_folded_paper(nn.Module):
     def __init__(self, intensity=0.4):
         super(transforms_folded_paper, self).__init__()
@@ -133,7 +169,7 @@ class transforms_folded_paper(nn.Module):
 
 
 
-
+"""
 if __name__ == "__main__":
 
     # Example usage
@@ -145,3 +181,12 @@ if __name__ == "__main__":
     cv2.imshow("Folded Paper Effect", folded_img)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+"""
+
+
+if __name__ =="__main__":
+    #image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/degradations/results/2K2476_16_01.jpg"
+    image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/Data/Sena/FRAN_0568_11AR_699/FRAN_0568_000014_L.jpg"
+    img = cv2.imread(image_path)
+    img = folded_paper2(img)
+    cv2.imwrite("folded_paper.jpg",img)

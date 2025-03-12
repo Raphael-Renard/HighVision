@@ -18,4 +18,11 @@ clip_transfer_vitl14_336p,0.251
 clip_transfer_vitl14,0.244
 clip_transfer_resnet50x16,0.242
 simclr_classique_loss1,0.137
+simclr_classique_loss2,0.133
+simclr_classique_loss1_lr,0.154
+simclr_fei_loss1,0.109
 simclr_fei_loss2,0.105
+simclr_fei_loss1_lr,0.123
+simclr_degrad_loss2,0.114
+simclr_degrad_loss1_lr,0.136
+simclr_degrad_loss1_lr_50,0.136

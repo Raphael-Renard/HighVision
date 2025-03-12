@@ -28,21 +28,28 @@ def text_overlay(img, font_size_1=None):
 
     # text
     if font_size_1 is None:
-        font_size_1 = corner_height//85
+        font_size_1 = corner_height//80
+        thickness_1 = 4*font_size_1
+        font_size_2 = font_size_1//2
+        thickness_2 = 6*font_size_2
 
         if corner==4: # top center
-            length_txt1 = (img.shape[1]-2*corner_width)//400
+            length_txt1 = (img.shape[1]-2*corner_width)//350
             length_txt2 = (img.shape[1]-2*corner_width)//250
         else: # corner
-            length_txt1 = corner_width//400
+            length_txt1 = corner_width//350
             length_txt2 = corner_width//200
     else:
-        length_txt1 = corner_width//20
-        length_txt2 = corner_width//20
+        if corner==4: # top center
+            length_txt1 = (img.shape[1]-2*corner_width)//20
+            length_txt2 = (img.shape[1]-2*corner_width)//20
+        else: # corner
+            length_txt1 = corner_width//350
+            length_txt2 = corner_width//200
 
-    thickness_1 = 3*font_size_1
-    font_size_2 = font_size_1//2
-    thickness_2 = 4*font_size_2
+        thickness_1 = 3*font_size_1
+        font_size_2 = font_size_1//2
+        thickness_2 = 4*font_size_2
 
     if font_size_2==0:
         font_size_2 = 1
@@ -124,7 +131,7 @@ class transforms_text_overlay(nn.Module):
 
 
 
-
+"""
 if __name__ == "__main__":
     path = "corpus/lipade_groundtruth/unique/"
     img = cv2.imread(path+"2K2476_02_01.jpg")
@@ -140,3 +147,11 @@ if __name__ == "__main__":
     cv2.imshow("corner", img)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+"""
+
+if __name__ =="__main__":
+    image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/degradations/results/2K2476_16_01.jpg"
+    #image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/Data/Sena/FRAN_0568_11AR_699/FRAN_0568_000014_L.jpg"
+    img = cv2.imread(image_path)
+    img = text_overlay(img,1)
+    cv2.imwrite("text_overlay.jpg",img)
