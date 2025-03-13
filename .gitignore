@@ -5,6 +5,7 @@ absolute_path.py
 data
 degradations/datasets/crumpled_texture/*
 degradations/datasets/folded_texture/*
+degradations/methods/results/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
