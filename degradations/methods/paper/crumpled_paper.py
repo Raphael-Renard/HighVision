@@ -66,14 +66,16 @@ def apply_texture2(cible):
 
     # Redimensionner pour correspondre à l'image cible
     texture_resized = cv2.resize(texture_filtered, (cible.shape[1], cible.shape[0]))
+    mean_texture = texture_filtered.mean()
+    adjustment = 128 - mean_texture  # Pour équilibrer autour de la moitié de l'échelle des gris
+    texture_filtered = np.clip(texture_filtered + adjustment, 0, 255).astype(np.uint8)
 
     # Mélanger les images
     alpha = 0.5  # Intensité de la texture
-    result = cv2.addWeighted(cible, 1 - alpha, texture_resized, alpha, 0)
-    #mean_color = (cible - texture_resized).mean()*alpha
-    #print(int(mean_color))
-    #result += int(mean_color)
+    result = cv2.addWeighted(cible, 0.8, texture_resized, alpha, 0)
+   
     return result.clip(0,255)
+
 
 
 def apply_texture(img):
@@ -154,17 +156,6 @@ class transforms_crumpled_paper(nn.Module):
         return results
 
 
-"""
-if __name__ == "__main__":
-    # Example usage
-    path = "degradations/datasets/original/"
-    img = cv2.imread(path+"FRAN_0568_000183_L.jpg")
-    crumpled_img = crumpled_paper(img)
-
-    cv2.imshow("Crumpled Paper Effect", crumpled_img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-"""
 
 if __name__ =="__main__":
     image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/degradations/results/2K2476_16_01.jpg"

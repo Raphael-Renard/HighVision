@@ -144,7 +144,7 @@ def folded_paper2(cible):
 
     # Mélanger les images
     alpha = 0.5  # Intensité de la texture
-    result = cv2.addWeighted(cible, 1 - alpha, texture_resized, alpha, 0)
+    result = cv2.addWeighted(cible, 0.8, texture_resized, alpha, 0)
 
     return result
 
@@ -167,21 +167,6 @@ class transforms_folded_paper(nn.Module):
             results[i] = image
         return results
 
-
-
-"""
-if __name__ == "__main__":
-
-    # Example usage
-    path = "degradations/datasets/original/"
-    img = cv2.imread(path+"FRAN_0568_000183_L.jpg")
-    #folded_img = fold_effect(img, num_folds=2, thickness=2, intensity=70)
-    folded_img = folded_paper(img)
-
-    cv2.imshow("Folded Paper Effect", folded_img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-"""
 
 
 if __name__ =="__main__":
