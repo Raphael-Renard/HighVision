@@ -115,21 +115,23 @@ class britishNewspaperArchiveExplorer():
             f.close()
 
         pages = self.pages[startIndex:]
-        limit = 100 # 5800 per month # https://www.britishnewspaperarchive.co.uk/content/terms_and_conditions
+        limit = 5600 # https://www.britishnewspaperarchive.co.uk/content/terms_and_conditions
         time_limit = 60
         refresh_time = 0.25
 
         waiting = None
-        for pageIndex in range(min(len(pages), limit)):
+        for pageIndex in range(len(pages)):
             pageUrl = pages[pageIndex]
             downloadUrl = prefix + "download/" + pageUrl[len(prefix):]
 
-            length = os.listdir(self.downloadDir)
+            length = len(os.listdir(self.downloadDir))
+            if length > limit:
+                break
 
             self.driver.execute_script(f'window.open("{downloadUrl}", "_blank");')
 
             waiting = 0
-            while length == os.listdir(self.downloadDir) and waiting < time_limit:
+            while length == len(os.listdir(self.downloadDir)) and waiting < time_limit:
                 time.sleep(refresh_time)
                 waiting += refresh_time
             time.sleep(2)
