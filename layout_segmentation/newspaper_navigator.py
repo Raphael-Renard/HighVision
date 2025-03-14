@@ -26,59 +26,57 @@ from detectron2.config import get_cfg
 from detectron2.modeling import build_model
 from detectron2.checkpoint import DetectionCheckpointer
 
-torch.cuda.empty_cache()
+def generate_predictions(file):
+    if os.path.exists(outPath(file.split("/")[-1][:-4])):
+        return
 
-def generate_predictions(filepaths, id):
-    #with torch.cuda.device(id):
-        # sets up model for process
-        setup_logger()
-        cfg = get_cfg()
-        cfg.merge_from_file(absolutePath + "layout_segmentation/configs/COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml")
+    # sets up model for process
+    setup_logger()
+    cfg = get_cfg()
+    cfg.merge_from_file(absolutePath + "layout_segmentation/configs/COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml")
 
-        # ("Illustration/Photograph", "Photograph", "Comics/Cartoon", "Editorial Cartoon", "Map", "Headline", "Ad")
-        cfg.MODEL.ROI_HEADS.NUM_CLASSES = 7
+    # ("Illustration/Photograph", "Photograph", "Comics/Cartoon", "Editorial Cartoon", "Map", "Headline", "Ad")
+    cfg.MODEL.ROI_HEADS.NUM_CLASSES = 7
 
-        model = build_model(cfg)
+    model = build_model(cfg)
+    model.cpu()
 
-        # https://news-navigator.labs.loc.gov/model_weights/model_final.pth
-        DetectionCheckpointer(model).load(absolutePath + "layout_segmentation/weight/model_final.pth")
-        model.train(False) 
+    # https://news-navigator.labs.loc.gov/model_weights/model_final.pth
+    DetectionCheckpointer(model).load(absolutePath + "layout_segmentation/weight/model_final.pth")
+    model.train(False)
 
-        inputs = []
-        dimensions = []
+    inputs = []
+    dimensions = []
 
-        for file in tqdm(filepaths):
-            image = cv2.imread(file)
-            height, width, _ = image.shape
-            dimensions.append([width, height])
-            image = np.transpose(image,(2,0,1))
-            image_tensor = torch.from_numpy(image)
-            inputs.append({"image": image_tensor})
+    image = cv2.imread(file)
+    height, width, _ = image.shape
+    dimensions.append([width, height])
+    image = np.transpose(image,(2,0,1))
+    image_tensor = torch.from_numpy(image)
+    inputs.append({"image": image_tensor})
 
-        outputs = model(inputs)
-        predictions = {}
+    outputs = model(inputs)
 
-        for i in tqdm(range(len(filepaths))):
-            predictions["filepath"] = filepaths[i]
-            predictions["pub_date"] = predictions["filepath"][-13:-7]
-            predictions["page_seq_num"] = predictions["filepath"][-6:-4]
+    predictions = {}
 
-            boxes = outputs[i]["instances"].get_fields()["pred_boxes"].to("cpu").tensor.tolist()
-            normalized_boxes = []
-            width = dimensions[i][0]
-            height = dimensions[i][1]
-            for box in boxes:
-                normalized_box = (box[0]/float(width), box[1]/float(height), box[2]/float(width), box[3]/float(height))
-                normalized_boxes.append(normalized_box)
+    predictions["filepath"] = file
+    predictions["pub_date"] = predictions["filepath"][-13:-7]
+    predictions["page_seq_num"] = predictions["filepath"][-6:-4]
 
-            predictions["boxes"] = normalized_boxes
-            predictions["scores"] = outputs[i]["instances"].get_fields()["scores"].to("cpu").tolist()
-            predictions["pred_classes"] = outputs[i]["instances"].get_fields()["pred_classes"].to("cpu").tolist()
+    boxes = outputs[0]["instances"].get_fields()["pred_boxes"].to("cpu").tensor.tolist()
+    normalized_boxes = []
+    width = dimensions[0][0]
+    height = dimensions[0][1]
+    for box in boxes:
+        normalized_box = (box[0]/float(width), box[1]/float(height), box[2]/float(width), box[3]/float(height))
+        normalized_boxes.append(normalized_box)
 
-            with open(outPath(filepaths[i].split("/")[-1][:-4]), "w") as fp:
-                json.dump(predictions, fp)
+    predictions["boxes"] = normalized_boxes
+    predictions["scores"] = outputs[0]["instances"].get_fields()["scores"].to("cpu").tolist()
+    predictions["pred_classes"] = outputs[0]["instances"].get_fields()["pred_classes"].to("cpu").tolist()
 
-N = len(pages)
-for i in range(N):
-    l = len(pages) // N
-    generate_predictions(pages[i*l:(i+1)*l], 1)
+    with open(outPath(file.split("/")[-1][:-4]), "w") as fp:
+        json.dump(predictions, fp)
+
+for i in tqdm(range(len(pages))):
+    generate_predictions(pages[i])
