@@ -130,7 +130,7 @@ def crumpled_paper(img, intensity_waves=10, intensity_blend=0.1):
 
     # reconvert to RGB
     crumpled_final = cv2.cvtColor(crumpled_final,cv2.COLOR_GRAY2RGB)
-    return crumpled_final
+    return crumpled_final.clip(0,255)
 
 
 
