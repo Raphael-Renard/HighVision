@@ -26,6 +26,7 @@ simclr_fei_loss1_lr,0.123
 simclr_degrad_loss2,0.114
 simclr_degrad_loss1_lr,0.136
 simclr_degrad_loss1_lr_50,0.136
+simclr_moi_2nd_try,0.155
 simclr_noise,0.140
 simclr_layout,0.142
 simclr_texture,0.146
@@ -35,3 +36,4 @@ simclr_stains,0.140
 simclr_degrad_mobilenet,0.130
 simclr_classique_800,0.141
 simclr_fei_800,0.145
+dino,0.189

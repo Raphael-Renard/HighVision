@@ -32,29 +32,6 @@ class transforms_stains(nn.Module):
 
 
 
-"""
-if __name__ == "__main__":
-    # Exemple d'utilisation
-    path = "corpus/lipade_groundtruth/unique/"
-    img = cv2.imread(path+"2K2476_02_01.jpg")
-
-     # resize image for better visualization
-    scale_percent = 20 # percent of original size
-    width = int(img.shape[1] * scale_percent / 100)
-    height = int(img.shape[0] * scale_percent / 100)
-    dim = (width, height)
-    img = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
-
-    stained_img = stains(img)
-
-   
-
-    cv2.imshow("Stains", stained_img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-"""
-
-
 if __name__ =="__main__":
     image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/degradations/results/2K2476_16_01.jpg"
     #image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/Data/Sena/FRAN_0568_11AR_699/FRAN_0568_000014_L.jpg"

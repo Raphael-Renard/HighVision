@@ -37,15 +37,9 @@ class transforms_scribbles(nn.Module):
         return results
 
 
-
-if __name__ == "__main__":
-    
-    # Exemple d'utilisation
-    path = "degradations/datasets/original/"
-    img = cv2.imread(path+"FRAN_0568_000183_L.jpg")
-
-    erased_img = scribbles(img)
-
-    cv2.imshow("Erased Effect", erased_img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+if __name__ =="__main__":
+    #image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/degradations/results/2K2476_16_01.jpg"
+    image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/Data/Sena/FRAN_0568_11AR_699/FRAN_0568_000014_L.jpg"
+    img = cv2.imread(image_path)
+    img = scribbles(img,None)
+    cv2.imwrite("scribbles.jpg",img)

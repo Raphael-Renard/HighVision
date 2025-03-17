@@ -97,23 +97,9 @@ class transforms_bleedthrough(nn.Module):
         return results
 
 
-if __name__ == "__main__":
-        
-    # Exemple d'utilisation
-    path = "degradations/datasets/original/"
-    img = cv2.imread(path+"FRAN_0568_000183_L.jpg")
-    img2 = cv2.imread(path+"/FRAN_0568_000220_L.jpg")
-
-    bleedthrough_img = bleedthrough(img,img2,0.2)
-    #bleedthrough_img = bleedthrough_augraphy(img)
-
-    # resize image for better visualization
-    scale_percent = 10 # percent of original size
-    width = int(img.shape[1] * scale_percent / 100)
-    height = int(img.shape[0] * scale_percent / 100)
-    dim = (width, height)
-    bleedthrough_img = cv2.resize(bleedthrough_img, dim, interpolation = cv2.INTER_AREA)
-
-    cv2.imshow("Bleedthrough", bleedthrough_img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+if __name__ =="__main__":
+    image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/degradations/results/2K2476_16_01.jpg"
+    #image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/Data/Sena/FRAN_0568_11AR_699/FRAN_0568_000014_L.jpg"
+    img = cv2.imread(image_path)
+    img = bleedthrough(img)
+    cv2.imwrite("bleedthrough.jpg",img)

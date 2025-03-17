@@ -33,7 +33,7 @@ def add_gaussian_noise(image, mean=0, stddev=25):
 
 
 class transforms_add_gaussian_noise(nn.Module):
-    def __init__(self, mean=0, stddev=25):
+    def __init__(self, mean=0, stddev=10):
         super(transforms_add_gaussian_noise, self).__init__()
         self.mean = mean
         self.stddev=stddev
@@ -54,5 +54,5 @@ if __name__ =="__main__":
     image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/degradations/results/2K2476_16_01.jpg"
     #image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/Data/Sena/FRAN_0568_11AR_699/FRAN_0568_000014_L.jpg"
     img = cv2.imread(image_path)
-    img = add_gaussian_noise(img)
+    img = add_gaussian_noise(img,stddev=10)
     cv2.imwrite("gaussian_noise.jpg",img)

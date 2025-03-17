@@ -66,16 +66,16 @@ def text_overlay(img, font_size_1=None):
     
     # text
     if font_size_1 is None:
-        font_size_1 = corner_height//80
+        font_size_1 = corner_height//70
         thickness_1 = 4*font_size_1
         font_size_2 = font_size_1//2
         thickness_2 = 6*font_size_2
 
         if corner==4: # top center
-            length_txt1 = (img.shape[1]-2*corner_width)//350
-            length_txt2 = (img.shape[1]-2*corner_width)//250
+            length_txt1 = (img.shape[1]-2*corner_width)//320
+            length_txt2 = (img.shape[1]-2*corner_width)//200
         else: # corner
-            length_txt1 = corner_width//350
+            length_txt1 = corner_width//320
             length_txt2 = corner_width//200
     else:
         if corner==4: # top center
@@ -105,7 +105,7 @@ def text_overlay(img, font_size_1=None):
                     cv2.FONT_HERSHEY_COMPLEX,font_size_1,(0,0,0),thickness_1,cv2.LINE_AA)
         cv2.putText(img,text2,(0,2*corner_height//3 + border),
                     cv2.FONT_HERSHEY_COMPLEX,font_size_2,(0,0,0),thickness_2,cv2.LINE_AA)
-        print((0,corner_height//3 + border),(0,2*corner_height//3 + border))
+        print((0,corner_height//3 + border),(0,2*corner_height//3 + 2*border))
         
     elif corner == 1: # top right corner
         img[0:corner_height, img.shape[1] - corner_width:img.shape[1]] = 255
@@ -113,7 +113,7 @@ def text_overlay(img, font_size_1=None):
         # write random text in the white rectangle
         cv2.putText(img,text1,(img.shape[1] - corner_width + border, corner_height//3 + border),
                     cv2.FONT_HERSHEY_COMPLEX,font_size_1,(0,0,0),thickness_1,cv2.LINE_AA)
-        cv2.putText(img,text2,(img.shape[1] - corner_width + border*2, 2*corner_height//3 + border),
+        cv2.putText(img,text2,(img.shape[1] - corner_width + border*2, 2*corner_height//3 + 2*border),
                     cv2.FONT_HERSHEY_COMPLEX,font_size_2,(0,0,0),thickness_2,cv2.LINE_AA)
 
      
@@ -123,7 +123,7 @@ def text_overlay(img, font_size_1=None):
         # write random text in the white rectangle
         cv2.putText(img,text1,(img.shape[1] - corner_width + border, img.shape[0] - corner_height + corner_height//3 + border),
                     cv2.FONT_HERSHEY_COMPLEX,font_size_1,(0,0,0),thickness_1,cv2.LINE_AA)
-        cv2.putText(img,text2,(img.shape[1] - corner_width + border*2, img.shape[0] - corner_height + 2*corner_height//3 + border),
+        cv2.putText(img,text2,(img.shape[1] - corner_width + border*2, img.shape[0] - corner_height + 2*corner_height//3 + 2*border),
                     cv2.FONT_HERSHEY_COMPLEX,font_size_2,(0,0,0),thickness_2,cv2.LINE_AA)
 
 
@@ -133,7 +133,7 @@ def text_overlay(img, font_size_1=None):
         # write random text in the white rectangle
         cv2.putText(img,text1,(0,img.shape[0] - corner_height + corner_height//3 + border),
                     cv2.FONT_HERSHEY_COMPLEX,font_size_1,(0,0,0),thickness_1,cv2.LINE_AA)
-        cv2.putText(img,text2,(0,img.shape[0] - corner_height+ 2*corner_height//3 + border),
+        cv2.putText(img,text2,(0,img.shape[0] - corner_height+ 2*corner_height//3 + 2*border),
                     cv2.FONT_HERSHEY_COMPLEX,font_size_2,(0,0,0),thickness_2,cv2.LINE_AA)
     
     else: # center
@@ -142,7 +142,7 @@ def text_overlay(img, font_size_1=None):
         # write random text in the white rectangle
         cv2.putText(img,text1,(corner_width + border, corner_height//3+ border),
                     cv2.FONT_HERSHEY_COMPLEX,font_size_1,(0,0,0),thickness_1,cv2.LINE_AA)
-        cv2.putText(img,text2,(corner_width + border*2, 2*corner_height//3 + border),
+        cv2.putText(img,text2,(corner_width + border*2, 2*corner_height//3 + 2*border),
                     cv2.FONT_HERSHEY_COMPLEX,font_size_2,(0,0,0),thickness_2,cv2.LINE_AA)
 
     return img
@@ -175,10 +175,10 @@ class transforms_text_overlay(nn.Module):
 
 if __name__ =="__main__":
     image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/degradations/results/2K2476_16_01.jpg"
-    #image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/Data/Sena/FRAN_0568_11AR_699/FRAN_0568_000014_L.jpg"
+    image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/Data/Sena/FRAN_0568_11AR_699/FRAN_0568_000014_L.jpg"
     img = cv2.imread(image_path)
     shape = img.shape
-    img, black_borders = remove_black_borders(img)
-    img = text_overlay(img,1)
-    img = restore_black_borders(shape, img, black_borders)
+    #img, black_borders = remove_black_borders(img)
+    img = text_overlay(img,None)
+    #img = restore_black_borders(shape, img, black_borders)
     cv2.imwrite("text_overlay.jpg",img)

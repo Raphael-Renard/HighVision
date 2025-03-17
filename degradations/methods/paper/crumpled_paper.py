@@ -146,7 +146,7 @@ class transforms_crumpled_paper(nn.Module):
         results = torch.empty_like(batch)
         for i, image in enumerate(batch):
             image_array = np.array(image).swapaxes(0,2) * 255
-            mask = np.where(image_array==0)
+            mask = np.where(image_array==0) # bords noirs
             image = crumpled_paper(image_array, intensity_waves=self.intensity_waves, 
                                    intensity_blend=self.intensity_blend)
             image[mask]=0
@@ -158,10 +158,8 @@ class transforms_crumpled_paper(nn.Module):
 
 
 if __name__ =="__main__":
-    image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/degradations/results/2K2476_16_01.jpg"
-    #image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/Data/Sena/FRAN_0568_11AR_699/FRAN_0568_000014_L.jpg"
+    #image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/degradations/results/2K2476_16_01.jpg"
+    image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/Data/Sena/FRAN_0568_11AR_699/FRAN_0568_000014_L.jpg"
     img = cv2.imread(image_path)
-    img = crumpled_paper(img).astype(np.uint8)
-    cv2.imshow("crumpled",img)
-    cv2.waitKey(0)
-    #cv2.imwrite("crumpled.jpg",img)
+    img = crumpled_paper(img,50).astype(np.uint8)
+    cv2.imwrite("crumpled.jpg",img)

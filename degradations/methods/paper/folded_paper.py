@@ -114,7 +114,7 @@ def folded_paper(img, intensity = 0.4):
     return blended
 
 
-def folded_paper2(cible):
+def folded_paper2(cible, alpha=0.5):
     cible = cv2.cvtColor(cible, cv2.COLOR_BGR2GRAY)
     texture_files = glob.glob(absolutePath+"degradations/datasets/folded_texture/*")
     texture_path = np.random.choice(texture_files)    
@@ -143,15 +143,14 @@ def folded_paper2(cible):
     texture_resized = cv2.resize(texture_filtered, (cible.shape[1], cible.shape[0]))
 
     # Mélanger les images
-    alpha = 0.5  # Intensité de la texture
     result = cv2.addWeighted(cible, 0.8, texture_resized, alpha, 0)
-
+    result = cv2.cvtColor(result,cv2.COLOR_GRAY2RGB)
     return result
 
 
 
 class transforms_folded_paper(nn.Module):
-    def __init__(self, intensity=0.4):
+    def __init__(self, intensity=0.5):
         super(transforms_folded_paper, self).__init__()
         self.intensity = intensity
 
@@ -159,8 +158,10 @@ class transforms_folded_paper(nn.Module):
         results = torch.empty_like(batch)
         for i, image in enumerate(batch):
             image_array = np.array(image).swapaxes(0,2) * 255
-            mask = np.where(image_array==0)
-            image = folded_paper(image_array, intensity=self.intensity)
+            mask = np.where(image_array==0) # bords noirs
+
+            image = folded_paper2(image_array, intensity=self.intensity)
+
             image[mask]=0
             image = np.array(image).swapaxes(0,2)
             image = torch.tensor(image) / 255
@@ -170,8 +171,10 @@ class transforms_folded_paper(nn.Module):
 
 
 if __name__ =="__main__":
-    #image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/degradations/results/2K2476_16_01.jpg"
-    image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/Data/Sena/FRAN_0568_11AR_699/FRAN_0568_000014_L.jpg"
-    img = cv2.imread(image_path)
+    image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/degradations/results/2K2476_16_01.jpg"
+    #image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/Data/Sena/FRAN_0568_11AR_699/FRAN_0568_000014_L.jpg"
+    img = cv2.imread(image_path) 
+    mask = np.where(img==0)
     img = folded_paper2(img)
-    cv2.imwrite("folded_paper.jpg",img)
+    img[mask]=0
+    cv2.imwrite("folded_paper_small.jpg",img)

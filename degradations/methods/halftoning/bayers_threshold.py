@@ -24,6 +24,7 @@ def generate_bayer_matrix(n):
     return np.block([[upper_left, upper_right],
                      [lower_left, lower_right]])
 
+
 def bayer_halftoning(image, cell_size=4):
     """
     Applies basic halftoning using a Bayer threshold matrix.
@@ -61,22 +62,43 @@ def bayer_halftoning(image, cell_size=4):
             halftoned_image[y:y + cell_size, x:x + cell_size] = thresholded_cell
     
     halftoned_image = cv2.cvtColor(halftoned_image,cv2.COLOR_GRAY2RGB)
-    #halftoned_image = halftoned_image.repeat((3,1,1))
     return halftoned_image
 
 
 
+def bayer_small(img, scale=5, cell_size=4):
+    """Agrandit l'image pour avoir une meilleure demi-teinte"""
+    h, w,_ = img.shape
+
+    new_size = (int(w * scale), int(h * scale))
+    img = cv2.resize(img, new_size, interpolation=cv2.INTER_LINEAR)
+
+    img = bayer_halftoning(img, cell_size)
+
+    h, w,_ = img.shape
+    new_size = (int(w/scale), int(h/scale))
+    img = cv2.resize(img, new_size, interpolation=cv2.INTER_AREA)
+  
+    return img
+
+
 class transforms_bayer_halftoning(nn.Module):
-    def __init__(self, cell_size=4):
+    def __init__(self, cell_size=4, scale=5):
         super(transforms_bayer_halftoning, self).__init__()
         self.cell_size=cell_size
+        self.scale=scale
 
     def __call__(self, batch):
         results = torch.empty_like(batch)
         for i, image in enumerate(batch):
             image_array = np.array(image).swapaxes(0,2) * 255
-            mask = np.where(image_array==0)
-            image_half = bayer_halftoning(image_array, self.cell_size)
+            mask = np.where(image_array==0) # bords noirs
+
+            if min(image_array.shape[0],image_array.shape[1])<1000:
+                image_half = bayer_small(image_array, self.scale, self.cell_size)
+            else:
+                image_half = bayer_halftoning(image_array, self.cell_size)
+
             image_half[mask] = 0
             image_half = image_half.swapaxes(0,2)
             results[i] = torch.tensor(image_half)/255
