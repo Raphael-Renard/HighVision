@@ -39,6 +39,7 @@ Simulate various types of degradations commonly found in historical photographs 
   - scribbles
   - stains
   - bleedthrough
+  - torn paper
 - **Layout**:
   - two pictures overlaying
   - text overlay
