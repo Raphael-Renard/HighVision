@@ -1,20 +1,20 @@
 import numpy as np
-import cv2
-import os
 import torch.nn as nn
 import torch
+import cv2
 
 def atkinson_dithering(image, block_size=8):
     """
     Applies Atkinson dithering to a grayscale image with block processing.
 
     Args:
-        image (numpy.ndarray): Grayscale input image.
+        image (numpy.ndarray): RGB input image.
         block_size (int): Size of the blocks for processing.
 
     Returns:
         numpy.ndarray: Dithered binary image.
     """
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     image = image.astype(np.float32)
     height, width = image.shape
     dithered_image = np.zeros_like(image, dtype=np.uint8)
@@ -49,16 +49,49 @@ def atkinson_dithering(image, block_size=8):
                     if y + 2 < block.shape[0]:
                         block[y + 2, x] += error
 
+    dithered_image = cv2.cvtColor(dithered_image,cv2.COLOR_GRAY2RGB)
     return dithered_image
 
 
 
+def atkinson_small(img, scale=5, block_size=8):
+    """Agrandit l'image pour avoir une meilleure demi-teinte"""
+    h, w,_ = img.shape
+
+    new_size = (int(w * scale), int(h * scale))
+    img = cv2.resize(img, new_size, interpolation=cv2.INTER_LINEAR)
+
+    img = atkinson_dithering(img, block_size)
+
+    h, w,_ = img.shape
+    new_size = (int(w/scale), int(h/scale))
+    img = cv2.resize(img, new_size, interpolation=cv2.INTER_AREA)
+  
+    return img
+
+
 class transforms_atkinson_dithering(nn.Module):
-    def __init__(self, block_size=8):
+    def __init__(self, block_size=8, scale=5):
         super(transforms_atkinson_dithering, self).__init__()
         self.block_size=block_size
+        self.scale=scale
 
     def __call__(self, batch):
-        for image in batch:
-            image = atkinson_dithering(image, self.block_size)
-        return batch.clamp(0, 1)
+        results = torch.empty_like(batch)
+
+        for i, image in enumerate(batch):
+            image_array = np.array(image).swapaxes(0,2) * 255
+            mask = np.where(image_array==0) # bords noirs
+            
+            if min(image_array.shape[0],image_array.shape[1])<1000:
+                image = atkinson_small(image_array, self.scale, self.block_size)
+            else:
+                image = atkinson_dithering(image_array, self.block_size)
+
+            image[mask] = 0
+            image = np.array(image).swapaxes(0,2)
+            image = torch.tensor(image)
+            results[i] = image / 255
+            
+        return results
+    
