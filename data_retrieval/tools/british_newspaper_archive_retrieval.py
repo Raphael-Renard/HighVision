@@ -10,16 +10,24 @@ from selenium.webdriver.firefox.options import Options
 profilePath = "/home/samuel-g/.mozilla/firefox/aba8fcod.Selenium"
 
 class britishNewspaperArchiveExplorer():
-    def __init__(self, title, startYear, endYear):
+    def __init__(self, title, startYear, endYear, downloadDir):
         self.title = title
         self.startYear = startYear
         self.endYear = endYear
+        self.downloadDir = downloadDir
 
         firefox_options = Options()
         firefox_options.set_preference("dom.webdriver.enabled", False)
         firefox_options.set_preference("useAutomationExtension", False)
         firefox_options.add_argument("-profile")
         firefox_options.add_argument(profilePath)
+
+        firefox_options.set_preference("browser.download.folderList", 2)
+        firefox_options.set_preference("browser.download.useDownloadDir", True)
+        firefox_options.set_preference("browser.download.dir", downloadDir)
+        firefox_options.set_preference("browser.helperApps.neverAsk.saveToDisk", "application/pdf")
+        firefox_options.set_preference("pdfjs.disabled", False)
+        firefox_options.set_preference('browser.download.manager.showWhenStarting', False)
 
         self.driver = webdriver.Firefox(options=firefox_options)
         self.driver.get("https://www.britishnewspaperarchive.co.uk/account/login")
@@ -35,7 +43,7 @@ class britishNewspaperArchiveExplorer():
 
         time.sleep(2)
 
-    def getIssues(self):
+    def getIssues(self, startIndex=0, saveIndex=None):
         self.issues = []
         index = 0
         while True:
@@ -50,6 +58,12 @@ class britishNewspaperArchiveExplorer():
                 break
             
             index += 1
+        
+        if saveIndex is not None:
+            f = open(saveIndex, "w")
+            result = str(startIndex + index)
+            f.write(result)
+            f.close()
 
     def getPages(self, issuesPath=None, startIndex=0, saveIndex=None):
         if issuesPath is not None:
@@ -90,7 +104,7 @@ class britishNewspaperArchiveExplorer():
             f.write(result)
             f.close()
     
-    def getPdf(self, downloadFolder, pagesPath=None, startIndex=0, saveIndex=None):
+    def getPdf(self, pagesPath=None, startIndex=0, saveIndex=None):
         prefix = "https://www.britishnewspaperarchive.co.uk/viewer/"
 
         if pagesPath is not None:
@@ -101,19 +115,41 @@ class britishNewspaperArchiveExplorer():
             f.close()
 
         pages = self.pages[startIndex:]
+        limit = 5600 # https://www.britishnewspaperarchive.co.uk/content/terms_and_conditions
+        time_limit = 60
+        refresh_time = 0.25
+
+        waiting = None
         for pageIndex in range(len(pages)):
             pageUrl = pages[pageIndex]
             downloadUrl = prefix + "download/" + pageUrl[len(prefix):]
 
-            # TODO {
-            print("TODO")
-            break
-            # } TODO
-        
-        if saveIndex is not None:
+            length = len(os.listdir(self.downloadDir))
+            if length > limit:
+                break
+
+            self.driver.execute_script(f'window.open("{downloadUrl}", "_blank");')
+
+            waiting = 0
+            while length == len(os.listdir(self.downloadDir)) and waiting < time_limit:
+                time.sleep(refresh_time)
+                waiting += refresh_time
+            time.sleep(2)
+            
+            if waiting >= time_limit:
+                break
+
+            self.driver.switch_to.window(self.driver.window_handles[-1])
+            self.driver.close()
+            self.driver.switch_to.window(self.driver.window_handles[0])
+
+        if saveIndex is not None and waiting is not None:
             f = open(saveIndex, "w")
             if pageIndex < len(pages) - 1:
-                result = str(startIndex + pageIndex)
+                if waiting >= time_limit:
+                    result = str(startIndex + pageIndex)
+                else:
+                    result = str(startIndex + pageIndex + 1)
             else :
                 result = "FINISHED"
             f.write(result)
