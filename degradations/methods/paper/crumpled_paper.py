@@ -2,18 +2,14 @@ import cv2
 import numpy as np
 import torch.nn as nn
 import torch
-from noise import pnoise2  # Perlin noise
+from noise import pnoise2
 import glob
 
 import sys
 import os
-"""
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../..')))
 from absolute_path import absolutePath
-"""
-absolutePath = 'C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/'
-
-#absolutePath = 'C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/'
 
 def generate_perlin_noise(shape, scale=200, octaves=3):
     """
@@ -40,7 +36,7 @@ def generate_perlin_noise(shape, scale=200, octaves=3):
 
 
 
-def apply_texture2(cible):
+def apply_texture(cible):
     texture_files = glob.glob(absolutePath+"degradations/datasets/crumpled_texture/*")
     texture_path = np.random.choice(texture_files)    
     texture_path = texture_path.replace("\\", "/")
@@ -78,20 +74,6 @@ def apply_texture2(cible):
 
 
 
-def apply_texture(img):
-    """Blends a folded paper texture onto an image."""
-    texture_files = glob.glob(absolutePath+"degradations/datasets/crumpled_texture/*")
-    texture_path = np.random.choice(texture_files)    
-    texture_path = texture_path.replace("\\", "/")
-    texture = cv2.imdecode(np.fromfile(texture_path, np.uint8), cv2.IMREAD_GRAYSCALE)
-
-    # Resize texture to match image size
-    texture = (255 - cv2.resize(texture, (img.shape[1], img.shape[0])))*2
-
-    # Blend using multiply
-    #blended = cv2.multiply(img.astype(np.float32) / 255.0, texture.astype(np.float32) / 255.0) *255
-    blended = cv2.addWeighted(img.astype(np.uint8),0.8,texture.astype(np.uint8),0.2,0)
-    return blended
 
 def crumpled_paper(img, intensity_waves=10, intensity_blend=0.1):
     """
@@ -126,7 +108,7 @@ def crumpled_paper(img, intensity_waves=10, intensity_blend=0.1):
 
     # Blend original with Perlin noise
     crumpled_final = cv2.addWeighted(crumpled_gray.astype(np.uint8), (1-intensity_blend), noise_map.astype(np.uint8), intensity_blend, 0)
-    crumpled_final= apply_texture2(crumpled_final)
+    crumpled_final= apply_texture(crumpled_final)
 
     # reconvert to RGB
     crumpled_final = cv2.cvtColor(crumpled_final,cv2.COLOR_GRAY2RGB)
