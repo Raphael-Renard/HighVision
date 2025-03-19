@@ -5,16 +5,10 @@ if path not in sys.path:
 
 import os
 from absolute_path import absolutePath
+from data_retrieval.guerre_illustree import getDataset
 
-imagePath = lambda yearmonth, name : f"corpus/guerre_illustree/data/{yearmonth}/pages/jpg/{name}.jpg"
-xmlPath = lambda yearmonth, name : f"corpus/guerre_illustree/data/{yearmonth}/pages/xml/{name}.xml"
-outPath = lambda name : f"corpus/guerre_illustree/retrieval/{name}.json"
-
-pages = []
-for yearmonth in os.listdir(absolutePath + "corpus/guerre_illustree/data"):
-    for page in os.listdir(absolutePath + "corpus/guerre_illustree/data/" + yearmonth + "/pages/jpg/"):
-        pageName = page.split(".")[0]
-        pages.append(imagePath(yearmonth, pageName))
+corpus = 'guerre_illustree'
+outPath = lambda name : f"corpus/{corpus}/retrieval/pages/{name}.json"
 
 import torch
 import json
@@ -78,5 +72,6 @@ def generate_predictions(file):
     with open(outPath(file.split("/")[-1][:-4]), "w") as fp:
         json.dump(predictions, fp)
 
+pages,_,_ = getDataset("page", jsonMetadata=False)
 for i in tqdm(range(len(pages))):
     generate_predictions(pages[i])
