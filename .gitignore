@@ -1,6 +1,8 @@
 # Custom
 corpus/*/*
 mini_corpus/*/*
+layout_segmentation/configs/*
+layout_segmentation/weight/*
 absolute_path.py
 data
 degradations/datasets/crumpled_texture/*
