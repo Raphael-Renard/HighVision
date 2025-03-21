@@ -6,6 +6,10 @@ data
 degradations/datasets/crumpled_texture/*
 degradations/datasets/folded_texture/*
 degradations/results/*
+representation/image/results/*
+representation/image/metods/logs/*
+clustering/clusters/lipade_groundtruth/*
+clustering/evaluation/lipade_groundtruth/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

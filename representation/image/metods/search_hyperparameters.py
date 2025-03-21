@@ -48,14 +48,13 @@ csv_filename = "results.csv"
 x,_,y = lipade_groundtruth.getDataset(mode = 'unique', uniform=True)
 
 images = []
-for i in range(500):
+for i in range(extract):
     images.append(Image.open(x[i]).convert('RGB'))
 
 
-x = np.array(x[:500])
-y = np.array(y[:500])
+x = np.array(x[:extract])
+y = np.array(y[:extract])
 images = np.array(images)
-print(images.shape)
 
 
 trainLoader = getDataLoader(images, None, None, False, batch_size, True, num_workers=2)
@@ -77,22 +76,20 @@ testLoader = getDataLoader(imagesSim, None, None, False, batch_size, shuffle=Fal
 
 from degradations.methods.halftoning.floyd_steinberg import transforms_floyd_steinberg_halftoning
 from degradations.methods.halftoning.atkinson import transforms_atkinson_dithering
-from degradations.methods.halftoning.bayers_threshold import transforms_bayer_halftoning
-from degradations.methods.halftoning.dot_traditional import transforms_dot_halftoning  # Import your halftoning methods
+from degradations.methods.halftoning.bayers_threshold import transforms_bayer_halftoning 
 from degradations.methods.noise.gaussian_noise import transforms_add_gaussian_noise
 from degradations.methods.noise.salt_and_pepper import transforms_add_salt_and_pepper_noise
 from degradations.methods.noise.dirty_rollers import transforms_dirty_rollers
-#from degradations.methods.noise.film_grain import transforms_apply_film_grain # Import your noise methods
 from degradations.methods.paper.ink_bleed import transforms_ink_bleed  
 from degradations.methods.paper.crumpled_paper import transforms_crumpled_paper
 from degradations.methods.paper.folded_paper import transforms_folded_paper
 from degradations.methods.paper.bleedthrough import transforms_bleedthrough
 from degradations.methods.paper.scribbles import transforms_scribbles
 from degradations.methods.paper.torn_paper import transforms_torn_paper
-from degradations.methods.paper.stains import transforms_stains # Import your paper feel methods
-from degradations.methods.human_corrections.erased_element import transforms_erased_element # Import your human correction methods
+from degradations.methods.paper.stains import transforms_stains 
+from degradations.methods.human_corrections.erased_element import transforms_erased_element
 from degradations.methods.layout.picture_overlay import transforms_picture_overlay
-from degradations.methods.layout.text_overlay import transforms_text_overlay # Import your layout methods
+from degradations.methods.layout.text_overlay import transforms_text_overlay 
 
 
 # Sepia
@@ -109,10 +106,7 @@ class transforms_SepiaFilter(nn.Module):
 
 
 
-
-
 # Representation
-
 class SimCLR_Representation(nn.Module):
     def __init__(self, encoder, in_dim=2048, out_dim=128):
         super(SimCLR_Representation, self).__init__()
@@ -136,11 +130,11 @@ def infoNCEloss(z1, z2, t=1):
 
     s = F.cosine_similarity(z.unsqueeze(1), z.unsqueeze(0), dim=-1)
     exp_s = torch.exp(s / t)
-    indicatorMask = torch.eye(s.shape[0], dtype=torch.bool, device=z.device) # True on diagonal, False elsewhere
+    indicatorMask = torch.eye(s.shape[0], dtype=torch.bool, device=z.device) 
     exp_s = exp_s.masked_fill(indicatorMask, 0)
 
-    numerator = F.cosine_similarity(z1, z2, dim=-1)      # for z1
-    numerator = torch.cat([numerator, numerator], dim=0) # for z2
+    numerator = F.cosine_similarity(z1, z2, dim=-1)  
+    numerator = torch.cat([numerator, numerator], dim=0) 
     numerator = torch.exp(numerator / t)
 
     denominator = exp_s.sum(dim=1)
@@ -151,7 +145,6 @@ def infoNCEloss(z1, z2, t=1):
 
 # Train
 def train_simclr(transform, name):
-    # ResNet50 - Stage 4
     representationEncoder = resnet18(weights=ResNet18_Weights.DEFAULT)
     representationEncoder.fc = nn.Identity()
     model = SimCLR_Representation(representationEncoder, in_dim=512).to(device)
@@ -210,13 +203,13 @@ def train_simclr(transform, name):
     thresholds_precision = 1000
     thresholds = np.linspace(0, 1, thresholds_precision)
 
-    precisions, recalls, f1s = evaluators.p_r_f1_byThresholds(thresholds, distance, y)
+    precisions, recalls, f1s = evaluators.p_r_f1_byThresholds(thresholds, distance, y_test)
 
-    AP, bestThresholdIndex = evaluators.pr_curve(precisions, recalls, f1s, other=("Fei mAP", evaluators.fei_mAP(y, distance)), save="evaluation/" + corpus + "/" + method + ".png")
+    AP, bestThresholdIndex = evaluators.pr_curve(precisions, recalls, f1s, other=("Fei mAP", evaluators.fei_mAP(y_test, distance)), save="evaluation/" + corpus + "/" + method + ".png")
 
     thresholdsClass = np.linspace(0, 1, int(thresholds_precision / 10))
-    precisions_per_class, recalls_per_class = evaluators.p_r_class_byThresholds(thresholdsClass, distance, y)
-    fei = evaluators.fei_mAP(y, distance)
+    precisions_per_class, recalls_per_class = evaluators.p_r_class_byThresholds(thresholdsClass, distance, y_test)
+    fei = evaluators.fei_mAP(y_test, distance)
     sam = evaluators.goncalves_mAP(precisions_per_class, recalls_per_class)
 
     
@@ -236,12 +229,12 @@ def train_simclr(transform, name):
 
 def objective(trial):
     # Sampling probabilities
-    prob_crop = trial.suggest_float("prob_crop", 0.5, 1.0)
+    prob_crop = trial.suggest_float("prob_crop", 0.0, 1.0)
     prob_halftone = trial.suggest_float("prob_halftone", 0.0, 1.0)
     prob_layout = trial.suggest_float("prob_layout", 0.0, 1.0)
     prob_erased = trial.suggest_float("prob_erased", 0.0, 1.0)
-    prob_noise = trial.suggest_float("prob_noise", 0.2, 1.0)
-    prob_stains = trial.suggest_float("prob_stains", 0.2, 1.0)
+    prob_noise = trial.suggest_float("prob_noise", 0.0, 1.0)
+    prob_stains = trial.suggest_float("prob_stains", 0.0, 1.0)
     prob_texture = trial.suggest_float("prob_texture", 0.0, 1.0)
     prob_flip = trial.suggest_float("prob_flip", 0.0, 1.0)
     prob_blur = trial.suggest_float("prob_blur", 0.0, 1.0)
@@ -249,7 +242,9 @@ def objective(trial):
 
     # Construire la transformation
     transform = transforms.Compose([
-        transforms.RandomResizedCrop(size=images.shape[2], scale=(1/2, 1), ratio=(1, 1)) if trial.suggest_categorical("use_crop", [True, False]) else None,
+        transforms.RandomApply([
+            transforms.RandomResizedCrop(size=images.shape[2], scale=(1/2, 1), ratio=(1, 1))
+        ], p=prob_crop),
         transforms.RandomApply([transforms.RandomChoice([
             transforms_floyd_steinberg_halftoning(),
             transforms_atkinson_dithering(),
@@ -274,7 +269,7 @@ def objective(trial):
         ])], p=prob_texture),
         transforms.RandomHorizontalFlip(p=prob_flip),
         transforms.RandomVerticalFlip(p=prob_flip),
-        transforms.RandomApply([transforms.GaussianBlur(kernel_size=5)], p=prob_blur),
+        transforms.RandomApply([transforms.GaussianBlur(kernel_size=9)], p=prob_blur),
         transforms.RandomApply([transforms_SepiaFilter()], p=prob_sepia)
     ])
  
