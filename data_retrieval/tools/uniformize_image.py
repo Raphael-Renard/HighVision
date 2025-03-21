@@ -7,7 +7,7 @@ from PIL import Image
 import numpy as np
 
 def uniformize_image(image_path, size):
-    image = Image.open(image_path)
+    image = Image.open(image_path).convert('RGB')
     image_array = np.array(image)
 
     if len(image_array.shape) == 2:
