@@ -1,4 +1,9 @@
 from augraphy import *
+import torch.nn as nn
+import torch
+import numpy as np
+import cv2
+
 
 def ink_bleed(img, intensity_range=(0.4, 0.7)):
     """
@@ -16,14 +21,28 @@ def ink_bleed(img, intensity_range=(0.4, 0.7)):
     return img_inkbleed
 
 
-import torch.nn as nn
+
 class transforms_ink_bleed(nn.Module):
     def __init__(self, intensity_range=(0.4, 0.7)):
         super(transforms_ink_bleed, self).__init__()
         self.intensity_range = intensity_range
 
     def __call__(self, batch):
-        for image in batch:
-            image = ink_bleed(image, self.intensity_range)
-        return batch
+        results = torch.empty_like(batch)
+        for i, image in enumerate(batch):
+            image_array = np.array(image).swapaxes(0,2) * 255
+            mask = np.where(image_array==0)
+            image = ink_bleed(image_array, self.intensity_range)
+            image[mask]=0
+            image = np.array(image).swapaxes(0,2)
+            image = torch.tensor(image)
+            results[i] = image / 255
+        return results
 
+
+if __name__ =="__main__":
+    #image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/degradations/results/2K2476_16_01.jpg"
+    image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/Data/Sena/FRAN_0568_11AR_699/FRAN_0568_000014_L.jpg"
+    img = cv2.imread(image_path)
+    img = ink_bleed(img)
+    cv2.imwrite("ink_bleed.jpg",img)
