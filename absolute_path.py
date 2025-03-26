@@ -1,1 +1,1 @@
-absolutePath = '/home/samuel-g/Documents/HighVision/highvision/'
+absolutePath = 'C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/'
