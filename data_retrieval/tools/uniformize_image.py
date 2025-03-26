@@ -8,9 +8,10 @@ import numpy as np
 
 def uniformize_image(image_path, size, path=True):
     if path:
-        image = Image.open(image_path)
+        image = Image.open(image_path).convert('RGB')
     else: 
         image = image_path
+
     image_array = np.array(image)
 
     if len(image_array.shape) == 2:
