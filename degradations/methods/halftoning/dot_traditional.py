@@ -1,13 +1,14 @@
 import numpy as np
-from PIL import Image, ImageDraw
 import cv2
+import torch.nn as nn
+import torch
 
 def dot_halftoning(image, cell_size=32, max_radius_factor=1.0, non_linear=False):
     """
     Applies dot-based halftoning to a grayscale image.
 
     Args:
-        image (numpy.ndarray): Grayscale input image (values in 0–255).
+        image (numpy.ndarray): RGB input image (values in 0–255).
         cell_size (int): Size of each halftoning cell.
         max_radius_factor (float): Factor to scale the maximum dot radius.
         non_linear (bool): Apply a non-linear intensity transformation.
@@ -15,9 +16,7 @@ def dot_halftoning(image, cell_size=32, max_radius_factor=1.0, non_linear=False)
     Returns:
         numpy.ndarray: Halftoned image.
     """
-    # Ensure the input is grayscale
-    if len(image.shape) != 2:
-        raise ValueError("Input image must be grayscale.")
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     height, width = image.shape
     halftoned_image = np.ones_like(image, dtype=np.uint8) * 255  # White background
@@ -48,11 +47,12 @@ def dot_halftoning(image, cell_size=32, max_radius_factor=1.0, non_linear=False)
             if radius > 0:
                 cv2.circle(halftoned_image, (center_x, center_y), radius, 0, -1)  # Black dot
 
+    halftoned_image = cv2.cvtColor(halftoned_image,cv2.COLOR_GRAY2RGB)
     return halftoned_image
 
 
 
-import torch.nn as nn
+
 class transforms_dot_halftoning(nn.Module):
     def __init__(self, cell_size=32, max_radius_factor=1.0, non_linear=False):
         super(transforms_dot_halftoning, self).__init__()
@@ -61,6 +61,13 @@ class transforms_dot_halftoning(nn.Module):
         self.non_linear=non_linear
 
     def __call__(self, batch):
-        for image in batch:
-            image = dot_halftoning(image, self.cell_size, self.max_radius_factor, self.non_linear)
-        return batch
+        results = torch.empty_like(batch)
+        for i, image in enumerate(batch):
+            image_array = np.array(image).swapaxes(0,2) * 255
+            mask = np.where(image_array==0)
+            image = dot_halftoning(image_array, self.cell_size, self.max_radius_factor, self.non_linear)
+            image[mask] = 0
+            image = np.array(image).swapaxes(0,2)
+            image = torch.tensor(image)
+            results[i] = image / 255
+        return results

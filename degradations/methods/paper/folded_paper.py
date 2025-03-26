@@ -2,6 +2,13 @@ import cv2
 import numpy as np
 import random
 import glob
+import os
+import sys
+import torch.nn as nn
+import torch
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../..')))
+from absolute_path import absolutePath
 
 
 # --- Method 1: draw fold lines on the paper ---
@@ -52,23 +59,8 @@ def generate_fold_lines(shape, num_folds=3, thickness=2, intensity=60, num_creas
         points = [(x, y + random.randint(-1, 1)) for x in range(0, width, 10)]
         points = np.array(points, np.int32).reshape((-1, 1, 2))
         cv2.polylines(fold_pattern, [points], isClosed=False, color=256, thickness=1)
-    """
-    # Add random crumples
-    for _ in range(num_creases):
-        x1, y1 = random.randint(0, width), random.randint(0, height)
-        x2, y2 = x1 + random.randint(-width//4, width//4), y1 + random.randint(-height//4, height//4)
-        points_1 = [(x1 + random.randint(-1, 1), y1) for y1 in range(0, height, 10)]
-        points_1 = np.array(points_1, np.int32).reshape((-1, 1, 2))
-        points_2 = [(x2,y2 + random.randint(-1, 1)) for x2 in range(0, width, 10)]
-        points_2 = np.array(points_2, np.int32).reshape((-1, 1, 2))
-        
-        cv2.polylines(fold_pattern, [points_1], 128 - intensity, thickness//2)
-        cv2.polylines(fold_pattern, [points_2], 128 - intensity, thickness//2)
-    """
+   
     fold_pattern = cv2.bitwise_not(fold_pattern)
-    
-    #noise = np.random.normal(0,15, (height, width)).astype(np.uint8)
-    #fold_pattern = cv2.subtract(fold_pattern, noise)
     return fold_pattern
 
 
@@ -97,50 +89,70 @@ def fold_effect(img, num_folds=2, thickness=2, intensity=80):
 
 
 
-# --- Method 2: apply a texture from a random crumpled paper image ---
+# --- Method 2: apply a texture from a random folded paper image ---
 
-def folded_paper(img, intensity = 0.4):
-    """
-    Applies a folded paper texture onto an image.
-    """
-    # grey image
-    gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-    texture_files = glob.glob("../datasets/folded_texture/*")
+def folded_paper(cible, alpha=0.5):
+    cible = cv2.cvtColor(cible, cv2.COLOR_BGR2GRAY)
+    texture_files = glob.glob(absolutePath+"degradations/datasets/folded_texture/*")
     texture_path = np.random.choice(texture_files)    
     texture_path = texture_path.replace("\\", "/")
     texture = cv2.imdecode(np.fromfile(texture_path, np.uint8), cv2.IMREAD_GRAYSCALE)
 
-    # Resize texture to match image size
-    texture = cv2.resize(texture, (img.shape[1], img.shape[0]))
- 
-    # Blend using multiply
-    blended = cv2.addWeighted(gray_img,(1-intensity),texture,intensity,0)
-    return blended
+    # Transformer en spectre de fréquence (FFT)
+    dft = cv2.dft(np.float32(texture), flags=cv2.DFT_COMPLEX_OUTPUT)
+    dft_shift = np.fft.fftshift(dft)
+
+    # Supprimer les basses fréquences pour isoler la texture
+    rows, cols = texture.shape
+    mask = np.ones((rows, cols, 2), np.uint8)
+    mask[rows//2-30:rows//2+30, cols//2-30:cols//2+30] = 0
+    dft_shift = dft_shift * mask
+
+    # Revenir à l'espace temporel
+    f_ishift = np.fft.ifftshift(dft_shift)
+    texture_filtered = cv2.idft(f_ishift)
+    texture_filtered = cv2.magnitude(texture_filtered[:, :, 0], texture_filtered[:, :, 1])
+
+    # Normaliser la texture filtrée
+    texture_filtered = cv2.normalize(texture_filtered, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
+
+    # Redimensionner pour correspondre à l'image cible
+    texture_resized = cv2.resize(texture_filtered, (cible.shape[1], cible.shape[0]))
+
+    # Mélanger les images
+    result = cv2.addWeighted(cible, 0.8, texture_resized, alpha, 0)
+    result = cv2.cvtColor(result,cv2.COLOR_GRAY2RGB)
+    return result
 
 
-import torch.nn as nn
+
 class transforms_folded_paper(nn.Module):
-    def __init__(self, intensity=10):
+    def __init__(self, intensity=0.5):
         super(transforms_folded_paper, self).__init__()
         self.intensity = intensity
 
     def __call__(self, batch):
-        for image in batch:
-            image = folded_paper(image, intensity=self.intensity)
-        return batch
+        results = torch.empty_like(batch)
+        for i, image in enumerate(batch):
+            image_array = np.array(image).swapaxes(0,2) * 255
+            mask = np.where(image_array==0) # bords noirs
+
+            image = folded_paper(image_array, intensity=self.intensity)
+
+            image[mask]=0
+            image = np.array(image).swapaxes(0,2)
+            image = torch.tensor(image) / 255
+            results[i] = image
+        return results
 
 
 
-
-if __name__ == "__main__":
-
-    # Example usage
-    path = "degradations/datasets/original/"
-    img = cv2.imread(path+"FRAN_0568_000183_L.jpg")
-    #folded_img = fold_effect(img, num_folds=2, thickness=2, intensity=70)
-    folded_img = folded_paper(img)
-
-    cv2.imshow("Folded Paper Effect", folded_img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+if __name__ =="__main__":
+    image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/degradations/results/2K2476_16_01.jpg"
+    #image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/Data/Sena/FRAN_0568_11AR_699/FRAN_0568_000014_L.jpg"
+    img = cv2.imread(image_path) 
+    mask = np.where(img==0)
+    img = folded_paper(img)
+    img[mask]=0
+    cv2.imwrite("folded_paper_small.jpg",img)
