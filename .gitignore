@@ -11,6 +11,7 @@ degradations/results/*
 representation/image/results/*
 representation/image/metods/logs/*
 clustering/clusters/lipade_groundtruth/*
+data_generation/generated/*/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
