@@ -61,7 +61,7 @@ def getDataset(mode, check=False, uniform=False, writeMeta=False):
         metadata = pd.read_csv(metadataPath)
     else:
         with open(selectedMetadataPath, "r") as f:
-            meta = [" ; ".join(line.rstrip().split(";")[1:]) for line in f.readlines()]
+            meta = [[" ; ".join(line.rstrip().split(";")[1:]) for line in f.readlines()]]
 
     paths = []
     labels = []
@@ -108,9 +108,17 @@ def getDataset(mode, check=False, uniform=False, writeMeta=False):
     else:
         l = len(os.listdir(similarPath))
         if mode == 'similar':
-            meta = meta[:l]
+            meta[0] = meta[0][:l]
         elif mode == 'unique':
-            meta = meta[l:]
+            meta[0] = meta[0][l:]
+
+        meta.append([])
+        for path in paths:
+            generatedPath = absolutePath + 'data_generation/generated/lipade_groundtruth/' + path.split('/')[-1].split('.')[0] + '.txt'
+            if os.path.exists(generatedPath):
+                with open(generatedPath, 'r') as f:
+                    generatedMeta = " ; ".join([line.rstrip() for line in f.readlines()])
+                    meta[1].append(generatedMeta)
 
     return paths, meta, labels # Images / Metadata / Groundtruth labels
 

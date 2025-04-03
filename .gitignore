@@ -8,7 +8,7 @@ data
 degradations/datasets/crumpled_texture/*
 degradations/datasets/folded_texture/*
 degradations/results/*
-representation/image/results/*
+representation/*/results/*
 representation/image/metods/logs/*
 clustering/clusters/lipade_groundtruth/*
 data_generation/generated/*/*
