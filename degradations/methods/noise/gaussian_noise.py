@@ -39,6 +39,11 @@ class transforms_add_gaussian_noise(nn.Module):
         self.stddev=stddev
 
     def __call__(self, batch):
+        one_image = False
+        if len(batch.shape) == 3: # si on ne passe qu'une image au lieu d'un batch
+            batch = batch.unsqueeze(0)
+            one_image = True
+            
         results = torch.empty_like(batch)
         for i, image in enumerate(batch):
             image_array = np.array(image).swapaxes(0,2) * 255
@@ -47,6 +52,9 @@ class transforms_add_gaussian_noise(nn.Module):
             image[mask]=0
             image = torch.tensor(image).swapaxes(0,2)
             results[i] = image / 255
+        
+        if one_image:
+            results = results.squeeze(0)
         return results
     
 

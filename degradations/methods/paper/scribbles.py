@@ -25,6 +25,11 @@ class transforms_scribbles(nn.Module):
         self.size_range = size_range
 
     def __call__(self, batch):
+        one_image = False
+        if len(batch.shape) == 3: # si on ne passe qu'une image au lieu d'un batch
+            batch = batch.unsqueeze(0)
+            one_image = True
+
         results = torch.empty_like(batch)
         for i, image in enumerate(batch):
             image_array = np.array(image).swapaxes(0,2) * 255
@@ -34,6 +39,9 @@ class transforms_scribbles(nn.Module):
             image = np.array(image).swapaxes(0,2)
             image = torch.tensor(image)
             results[i] = image / 255
+        
+        if one_image:
+            results = results.squeeze(0)
         return results
 
 

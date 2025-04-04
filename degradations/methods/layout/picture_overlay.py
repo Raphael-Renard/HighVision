@@ -157,6 +157,11 @@ class transforms_picture_overlay(nn.Module):
         self.thickness = thickness
 
     def __call__(self, batch):
+        one_image = False
+        if len(batch.shape) == 3: # si on ne passe qu'une image au lieu d'un batch
+            batch = batch.unsqueeze(0)
+            one_image = True
+
         results = torch.empty_like(batch)
         
         for i, image in enumerate(batch):
@@ -171,6 +176,9 @@ class transforms_picture_overlay(nn.Module):
             image = np.transpose(image, (2, 0, 1))
             image = torch.tensor(image)
             results[i] = image / 255
+        
+        if one_image:
+            results = results.squeeze(0)
         return results
 
 
