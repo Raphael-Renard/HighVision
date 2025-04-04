@@ -114,7 +114,7 @@ def getDataset(mode, check=False, uniform=False, writeMeta=False):
 
         meta.append([])
         for path in paths:
-            generatedPath = absolutePath + 'data_generation/generated/lipade_groundtruth/' + path.split('/')[-1].split('.')[0] + '.txt'
+            generatedPath = absolutePath + 'data_generation/generated/lipade_groundtruth/' + path.split('/')[-1].split('.')[0] + '.csv'
             if os.path.exists(generatedPath):
                 with open(generatedPath, 'r') as f:
                     generatedMeta = " ; ".join([line.rstrip() for line in f.readlines()])
