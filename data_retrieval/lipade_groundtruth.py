@@ -109,9 +109,17 @@ def getDataset(mode, check=False, uniform=False, writeMeta=False):
     else:
         l = len(os.listdir(similarPath))
         if mode == 'similar':
-            meta = meta[:l]
+            meta[0] = meta[0][:l]
         elif mode == 'unique':
-            meta = meta[l:]
+            meta[0] = meta[0][l:]
+
+        meta.append([])
+        for path in paths:
+            generatedPath = absolutePath + 'data_generation/generated/lipade_groundtruth/' + path.split('/')[-1].split('.')[0] + '.csv'
+            if os.path.exists(generatedPath):
+                with open(generatedPath, 'r') as f:
+                    generatedMeta = " ; ".join([line.rstrip() for line in f.readlines()])
+                    meta[1].append(generatedMeta)
 
     return paths, meta, labels # Images / Metadata / Groundtruth labels
 

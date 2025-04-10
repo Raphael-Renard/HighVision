@@ -9,11 +9,11 @@ degradations/datasets/crumpled_texture/*
 degradations/datasets/folded_texture/*
 degradations/datasets/objets_extraits/*
 degradations/results/*
-representation/image/results/*
+representation/*/results/*
 representation/image/metods/logs/*
 representation/image/metods/fonts/*
 clustering/clusters/lipade_groundtruth/*
-clustering/evaluation/lipade_groundtruth/*
+data_generation/generated/*/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
