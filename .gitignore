@@ -7,9 +7,11 @@ absolute_path.py
 data
 degradations/datasets/crumpled_texture/*
 degradations/datasets/folded_texture/*
+degradations/datasets/objets_extraits/*
 degradations/results/*
 representation/image/results/*
 representation/image/metods/logs/*
+representation/image/metods/fonts/*
 clustering/clusters/lipade_groundtruth/*
 clustering/evaluation/lipade_groundtruth/*
 
