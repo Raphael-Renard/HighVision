@@ -41,12 +41,11 @@ Simulate various types of degradations commonly found in historical photographs 
   - bleedthrough
   - torn paper
 - **Layout**:
-  - two pictures overlaying
+  - corner overlay
   - text overlay
 - **Human made corrections**:
   - object erased
-- **Pipeline Support**:
-  - Combine multiple degradations into a single simulation pipeline.
+
 ## 6- Representation
 ### Image representation
 ### Multimodal representation
