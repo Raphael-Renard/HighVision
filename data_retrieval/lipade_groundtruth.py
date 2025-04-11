@@ -60,9 +60,8 @@ def getDataset(mode, check=False, uniform=False, writeMeta=False):
         meta = []
         metadata = pd.read_csv(metadataPath)
     else:
-        meta = ["" for _ in range(len(os.listdir(similarPath)) + len(os.listdir(uniquePath)))]
-        # with open(selectedMetadataPath, "r") as f:
-        #     meta = [" ; ".join(line.rstrip().split(";")[1:]) for line in f.readlines()]
+        with open(selectedMetadataPath, "r") as f:
+            meta = [" ; ".join(line.rstrip().split(";")[1:]) for line in f.readlines()]
 
     paths = []
     labels = []
