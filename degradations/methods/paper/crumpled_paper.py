@@ -9,7 +9,9 @@ import sys
 import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../..')))
-from absolute_path import absolutePath
+#from absolute_path import absolutePath
+absolutePath = 'C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/'
+
 
 def generate_perlin_noise(shape, scale=200, octaves=3):
     """
@@ -68,7 +70,7 @@ def apply_texture(cible):
 
     # Mélanger les images
     alpha = 0.5  # Intensité de la texture
-    result = cv2.addWeighted(cible, 0.8, texture_resized, alpha, 0)
+    result = cv2.addWeighted(cible, 0.9, texture_resized, alpha, 0)
    
     return result.clip(0,255)
 
@@ -125,6 +127,11 @@ class transforms_crumpled_paper(nn.Module):
 
 
     def __call__(self, batch):
+        one_image = False
+        if len(batch.shape) == 3: # si on ne passe qu'une image au lieu d'un batch
+            batch = batch.unsqueeze(0)
+            one_image = True
+
         results = torch.empty_like(batch)
         for i, image in enumerate(batch):
             image_array = np.array(image).swapaxes(0,2) * 255
@@ -135,13 +142,71 @@ class transforms_crumpled_paper(nn.Module):
             image = np.array(image).swapaxes(0,2)
             image = torch.tensor(image) / 255
             results[i] = image
+        
+        if one_image:
+            results = results.squeeze(0)
         return results
 
 
 
+
+
+
+
+
+import cv2
+import numpy as np
+import torch
+import torch.nn as nn
+
+
+def remove_black_borders(image):
+    """Supprime les bords noirs qui ont été rajoutés pour le dataloader."""
+    # Créer un masque détectant les pixels non noirs
+    mask = np.any(image > 0, axis=2)
+    
+    # Trouver les coordonnées des pixels non noirs
+    coords = np.column_stack(np.where(mask))
+
+    if len(coords) == 0:
+        return image
+
+    # Trouver la boîte englobante des pixels non noirs
+    y_min, x_min = coords.min(axis=0)
+    y_max, x_max = coords.max(axis=0)
+
+    # Recadre image
+    cropped_image = image[y_min:y_max+1, x_min:x_max+1]
+
+    return cropped_image, (y_min, x_min, y_max, x_max)  # image recadrée et coordonnées du recadrage
+
+def restore_black_borders(original_shape, cropped_image, crop_coords):
+    """Restaure les bords noirs après traitement, en gardant la taille originale."""
+    h_original, w_original = original_shape[:2]
+    h_cropped, w_cropped = cropped_image.shape[:2]
+
+    # Créer une image noire avec la taille originale
+    restored_image = np.zeros((h_original, w_original, 3), dtype=np.uint8)
+
+    # Récupérer les anciennes coordonnées de la zone non noire
+    y_min, x_min, _, _ = crop_coords
+
+    # Coller l’image recadrée au bon emplacement
+    restored_image[y_min:y_min+h_cropped, x_min:x_min+w_cropped] = cropped_image
+
+    return restored_image
+
+
+
 if __name__ =="__main__":
-    #image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/degradations/results/2K2476_16_01.jpg"
-    image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/Data/Sena/FRAN_0568_11AR_699/FRAN_0568_000014_L.jpg"
+    image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/degradations/results/2K2476_16_01.jpg"
+    #image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/Data/Sena/FRAN_0568_11AR_699/FRAN_0568_000014_L.jpg"
     img = cv2.imread(image_path)
-    img = crumpled_paper(img,50).astype(np.uint8)
+
+    shape = img.shape
+    img, black_borders = remove_black_borders(img)
+    img = crumpled_paper(img,10,0.3).astype(np.uint8)
+    img = restore_black_borders(shape, img, black_borders)
+
+    #img = crumpled_paper(img,50).astype(np.uint8)
     cv2.imwrite("crumpled.jpg",img)
