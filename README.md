@@ -18,6 +18,7 @@ Identification of image circulation in large collections of historical photograp
 ## 3- Data Retrieval
 ## 4- Layout Segmentation
 ## 5- Degradations
+## 5 bis- Data Generation
 ### Overview
 Simulate various types of degradations commonly found in historical photographs and printed materials. 
 
