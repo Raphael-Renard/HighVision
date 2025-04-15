@@ -27,11 +27,9 @@ Simulate various types of degradations commonly found in historical photographs 
   - Atkinson dithering
   - Floyd-Steinberg dithering
   - Bayers threshold halftoning
-  - Dot-based halftoning
 - **Noise Addition**:
   - Gaussian noise
   - Salt-and-pepper noise
-  - film grain
   - dirty rollers
 - **Paper Imperfections**:
   - ink bleed
@@ -42,12 +40,12 @@ Simulate various types of degradations commonly found in historical photographs 
   - bleedthrough
   - torn paper
 - **Layout**:
-  - two pictures overlaying
+  - corner overlay
   - text overlay
+  - change frame shape
 - **Human made corrections**:
   - object erased
-- **Pipeline Support**:
-  - Combine multiple degradations into a single simulation pipeline.
+
 ## 6- Representation
 ### Image representation
 ### Multimodal representation

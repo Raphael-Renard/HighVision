@@ -75,6 +75,11 @@ class transforms_floyd_steinberg_halftoning(nn.Module):
         self.scale=scale
 
     def __call__(self, batch):
+        one_image = False
+        if len(batch.shape) == 3: # si on ne passe qu'une image au lieu d'un batch
+            batch = batch.unsqueeze(0)
+            one_image = True
+            
         results = torch.empty_like(batch)
         for i, image in enumerate(batch):
 
@@ -93,6 +98,9 @@ class transforms_floyd_steinberg_halftoning(nn.Module):
 
             image = torch.tensor(image)
             results[i] = image / 255
+
+        if one_image:
+            results = results.squeeze(0)
         return results
     
 

@@ -8,8 +8,8 @@ import torch.nn as nn
 import torch
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../..')))
-from absolute_path import absolutePath
-
+#from absolute_path import absolutePath
+absolutePath = "C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/"
 
 # --- Method 1: draw fold lines on the paper ---
 
@@ -121,29 +121,37 @@ def folded_paper(cible, alpha=0.5):
     texture_resized = cv2.resize(texture_filtered, (cible.shape[1], cible.shape[0]))
 
     # Mélanger les images
-    result = cv2.addWeighted(cible, 0.8, texture_resized, alpha, 0)
+    result = cv2.addWeighted(cible.astype(int), 0.8, texture_resized.astype(int), alpha, 0)
     result = cv2.cvtColor(result,cv2.COLOR_GRAY2RGB)
     return result
 
 
 
 class transforms_folded_paper(nn.Module):
-    def __init__(self, intensity=0.5):
+    def __init__(self, alpha=0.5):
         super(transforms_folded_paper, self).__init__()
-        self.intensity = intensity
+        self.alpha = alpha
 
     def __call__(self, batch):
+        one_image = False
+        if len(batch.shape) == 3: # si on ne passe qu'une image au lieu d'un batch
+            batch = batch.unsqueeze(0)
+            one_image = True
+            
         results = torch.empty_like(batch)
         for i, image in enumerate(batch):
             image_array = np.array(image).swapaxes(0,2) * 255
             mask = np.where(image_array==0) # bords noirs
 
-            image = folded_paper(image_array, intensity=self.intensity)
+            image = folded_paper(image_array, alpha=self.alpha)
 
             image[mask]=0
             image = np.array(image).swapaxes(0,2)
             image = torch.tensor(image) / 255
             results[i] = image
+        
+        if one_image:
+            results = results.squeeze(0)
         return results
 
 
@@ -155,4 +163,5 @@ if __name__ =="__main__":
     mask = np.where(img==0)
     img = folded_paper(img)
     img[mask]=0
-    cv2.imwrite("folded_paper_small.jpg",img)
+    cv2.imshow("folded_paper_small",img)
+    cv2.waitKey(0)

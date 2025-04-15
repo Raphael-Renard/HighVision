@@ -4,6 +4,34 @@ from tqdm import tqdm
 
 from clustering import getPredictionFromThreshold
 
+def kappa(y, predicted_y):
+    TP = 0
+    FP = 0
+    FN = 0
+    TN = 0
+
+    for i in range(len(y)):
+        for j in range(i+1, len(y)):
+            if y[i] == y[j]:
+                if predicted_y[i] == predicted_y[j]:
+                    TP += 1
+                else:
+                    FN += 1
+            else:
+                if predicted_y[i] == predicted_y[j]:
+                    FP += 1
+                else:
+                    TN += 1
+
+    total = TP + TN + FP + FN
+    P_o = (TP + TN) / total
+    P_Yes = ((TP + FP)/total) * ((TP + FN)/total)
+    P_No = ((TN + FP)/total) * ((TN + FN)/total)
+    P_e = P_Yes + P_No
+
+    kappa = (P_o - P_e) / (1 - P_e)
+    return kappa
+
 def p_r_class(predicted_y, y):
     y = np.array(y)
     predicted_y = np.array(predicted_y)
