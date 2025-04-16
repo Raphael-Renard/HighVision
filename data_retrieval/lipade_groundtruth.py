@@ -61,7 +61,7 @@ def getDataset(mode, check=False, uniform=False, writeMeta=False):
         metadata = pd.read_csv(metadataPath)
     else:
         with open(selectedMetadataPath, "r") as f:
-            meta = [" ; ".join(line.rstrip().split(";")[1:]) for line in f.readlines()]
+            meta = [[" ; ".join(line.rstrip().split(";")[1:]) for line in f.readlines()]]
 
     paths = []
     labels = []
@@ -79,7 +79,7 @@ def getDataset(mode, check=False, uniform=False, writeMeta=False):
                     groups[g][i] = os.path.join(similarPath, groups[g][i] + '.jpg')
                 paths.append(groups[g][i])
                 if writeMeta:
-                    meta.append(getMetadata(metadata.loc[metadata['name'] == groups[g][i].split("/")[-1]]))
+                    meta[0].append(getMetadata(metadata.loc[metadata['name'] == groups[g][i].split("/")[-1]]))
                 labels.append(g)
         labelPadding = len(groups)
 
@@ -95,7 +95,7 @@ def getDataset(mode, check=False, uniform=False, writeMeta=False):
             file = path.split("/")[-1]
             paths.append(path)
             if writeMeta:
-                meta.append(getMetadata(metadata.loc[metadata['name'] == file]))
+                meta[0].append(getMetadata(metadata.loc[metadata['name'] == file]))
             labels.append(labelPadding + index)
 
             isMeta = False
@@ -132,7 +132,7 @@ def getDataset(mode, check=False, uniform=False, writeMeta=False):
             generatedPath = absolutePath + 'data_generation/generated/lipade_groundtruth/' + path.split('/')[-1].split('.')[0] + '.csv'
             if os.path.exists(generatedPath):
                 with open(generatedPath, 'r') as f:
-                    generatedMeta = " ; ".join([line.rstrip() for line in f.readlines()])
+                    generatedMeta = [line.rstrip().split(';') for line in f.readlines()]
                     meta[1].append(generatedMeta)
 
         meta.append(meta_rectos)
