@@ -23,7 +23,7 @@ model, vis_processors, _ = load_model_and_preprocess(
     name="blip_caption", model_type="large_coco", is_eval=True, device="cpu"
 )
 
-parallelize(model, num_gpus=4, verbose="simple")
+parallelize(model, fp16=False, num_gpus=4, verbose="simple")
 
 x_s,_,y_s = lipade_groundtruth.getDataset(mode="similar")
 
