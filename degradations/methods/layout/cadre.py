@@ -3,6 +3,12 @@ import torch.nn as nn
 import torch
 import numpy as np
 import random
+import sys
+import os
+import glob
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../..')))
+from absolute_path import absolutePath
 
 
 def add_formes_fond(fond, couleur_type, nombre_formes=30):
@@ -46,27 +52,30 @@ def add_formes_fond(fond, couleur_type, nombre_formes=30):
     return fond
 
 
-def cadrage(image, forme='cercle', couleur_fond='blanc', formes_fond=True):
+def cadrage(image, forme='rond', couleur_fond='blanc', formes_fond=True, contour_epaisseur = 33):
     """
     Applique un cadrage rond ou losange à une image.
 
     Args:
         image (np.array): Image d'entrée.
-        forme (str): 'cercle' ou 'losange'.
-        couleur_fond (str): 'blanc' pour un fond blanc, 'noir' pour un fond noir.
+        forme (str): 'rond' ou 'losange'.
+        couleur_fond (str): 'blanc' pour un fond blanc, 'noir' pour un fond noir, 'photo' pour mettre une autre photo en fond.
         formes_fond (bool): Si True, ajoute des formes aléatoires sur le fond.
     """
     
+    if couleur_fond=="photo":
+        formes_fond = False
 
     h, w = image.shape[:2]
 
     masque = np.zeros_like(image, dtype=np.uint8)
     masque.fill(255)
 
-    if forme == 'cercle':
+    if forme == 'rond':
         centre = (w // 2, h // 2)
-        rayon = min(w, h) // 2
-        cv2.circle(masque, centre, rayon, (0,0,0), -1)
+        rayon_h, rayon_w = int(h/2), int(w/2)
+        cv2.ellipse(image, centre, (rayon_h, rayon_w), 90, 0, 360, (255, 255, 255), contour_epaisseur*2)
+        cv2.ellipse(masque, centre, (rayon_h, rayon_w), 90, 0, 360, (0,0,0), -1)
 
     elif forme == 'losange':
         points = np.array([
@@ -75,10 +84,12 @@ def cadrage(image, forme='cercle', couleur_fond='blanc', formes_fond=True):
             [w // 2, h],          # bas
             [0, h // 2]           # gauche
         ])
+        
+        cv2.polylines(image, [points], isClosed=True, color=(255, 255, 255), thickness=contour_epaisseur*2) # Contour blanc
         cv2.fillConvexPoly(masque, points, (0,0,0))
 
     else:
-        raise ValueError("Forme non reconnue : choisir 'cercle' ou 'losange'.")
+        raise ValueError("Forme non reconnue : choisir 'rond' ou 'losange'.")
     
 
 
@@ -97,6 +108,23 @@ def cadrage(image, forme='cercle', couleur_fond='blanc', formes_fond=True):
         else:
             image = np.where(masque == 255, image, masque)
 
+    elif couleur_fond == "photo":
+        photo_files = glob.glob(absolutePath+"degradations/datasets/backgrounds/*")
+        photo_path = np.random.choice(photo_files)    
+        photo_path = photo_path.replace("\\", "/")
+        autre_photo = cv2.imdecode(np.fromfile(photo_path, np.uint8), cv2.IMREAD_UNCHANGED)
+
+        if len(autre_photo.shape) != len(image.shape):
+            if len(image.shape) == 3:
+                autre_photo = cv2.colorChange(autre_photo, cv2.COLOR_BGR2GRAY)
+            else:
+                autre_photo = cv2.colorChange(autre_photo, cv2.COLOR_GRAY2BGR)
+
+        autre_photo = cv2.resize(autre_photo,(w,h))
+
+        image = np.where(masque == 0, image, autre_photo)
+    else:
+        raise ValueError("Couleur_fond non reconnue : choisir 'noir', 'blanc' ou 'photo'.")
     return image
 
 
@@ -120,12 +148,12 @@ class transforms_cadre(nn.Module):
             image_array = image_array.astype(np.uint8)
 
             if self.forme is None:
-                forme = random.choice(['cercle', 'losange'])
+                forme = random.choice(['rond', 'losange'])
             else:
                 forme = self.forme
             
             if self.couleur_fond is None:
-                couleur_fond = random.choice(['blanc', 'noir'])
+                couleur_fond = random.choice(['blanc', 'noir', 'photo'])
             else:
                 couleur_fond = self.couleur_fond
             
