@@ -28,28 +28,29 @@ x_u,m_u,_ = lipade_groundtruth.getDataset(mode="unique")
 is_recto = np.array(m_u[2])
 x_u = np.array(x_u)[is_recto]
 
-path = absolutePath + 'data_generation/generated/' + corpus + "/"
+path = absolutePath + 'data_generation/generated/' + corpus + '.csv'
+
+if os.path.exists(path):
+    with open(path, mode='r') as infile:
+        reader = csv.reader(infile, delimiter=';')
+        dict = {(rows[0],rows[1]): rows[2] for rows in reader}
+else:
+    dict = {}
 
 for x in [x_u, x_s]:
     for i in tqdm(range(len(x))):
         image = Image.open(x[i]).convert('RGB')
-        filename = x[i].split('/')[-1].split('.')[0] + '.csv'
-        if os.path.exists(path + filename):
-            with open(path + filename, mode='r') as infile:
-                reader = csv.reader(infile, delimiter=';')
-                dict = {rows[0]: rows[1] for rows in reader}
-        else:
-            dict = {}
+        filename = '/'.join(x[i].split('/')[-2:])
 
-        if "" in dict:
+        if (filename, "") in dict:
             continue
 
         image = vis_processors["eval"](image).unsqueeze(0).to(device, torch.float16)
         generated_text = model.generate({"image": image})
-        dict[""] = generated_text[0].strip()
+        dict[(filename, "")] = generated_text[0].strip()
 
-        with open(path + filename, 'w') as outfile:
+        with open(path, 'w') as outfile:
             res_dict = csv.writer(outfile, delimiter=';')
             kv = list(dict.items())
             for key, value in kv:
-                res_dict.writerow([key, value])
+                res_dict.writerow([key[0], key[1], value])
