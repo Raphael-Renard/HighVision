@@ -11,6 +11,45 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../.
 from absolute_path import absolutePath
 
 
+def remove_black_borders(image):
+    """Supprime les bords noirs qui ont été rajoutés pour le dataloader."""
+    # Créer un masque détectant les pixels non noirs
+    mask = np.any(image > 0, axis=2)
+    
+    # Trouver les coordonnées des pixels non noirs
+    coords = np.column_stack(np.where(mask))
+
+    if len(coords) == 0:
+        return image
+
+    # Trouver la boîte englobante des pixels non noirs
+    y_min, x_min = coords.min(axis=0)
+    y_max, x_max = coords.max(axis=0)
+
+    # Recadre image
+    cropped_image = image[y_min:y_max+1, x_min:x_max+1]
+
+    return cropped_image, (y_min, x_min, y_max, x_max)  # image recadrée et coordonnées du recadrage
+
+def restore_black_borders(original_shape, cropped_image, crop_coords):
+    """Restaure les bords noirs après traitement, en gardant la taille originale."""
+    h_original, w_original = original_shape[:2]
+    h_cropped, w_cropped = cropped_image.shape[:2]
+
+    # Créer une image noire avec la taille originale
+    restored_image = np.zeros((h_original, w_original, 3), dtype=np.uint8)
+
+    # Récupérer les anciennes coordonnées de la zone non noire
+    y_min, x_min, _, _ = crop_coords
+
+    # Coller l’image recadrée au bon emplacement
+    restored_image[y_min:y_min+h_cropped, x_min:x_min+w_cropped] = cropped_image
+
+    return restored_image
+
+
+
+
 def add_formes_fond(fond, couleur_type, nombre_formes=30):
     h, w, _ = fond.shape
 
@@ -112,13 +151,13 @@ def cadrage(image, forme='rond', couleur_fond='blanc', formes_fond=True, contour
         photo_files = glob.glob(absolutePath+"degradations/datasets/backgrounds/*")
         photo_path = np.random.choice(photo_files)    
         photo_path = photo_path.replace("\\", "/")
-        autre_photo = cv2.imdecode(np.fromfile(photo_path, np.uint8), cv2.IMREAD_UNCHANGED)
+        autre_photo = cv2.imread(photo_path)
 
         if len(autre_photo.shape) != len(image.shape):
             if len(image.shape) == 3:
-                autre_photo = cv2.colorChange(autre_photo, cv2.COLOR_BGR2GRAY)
-            else:
                 autre_photo = cv2.colorChange(autre_photo, cv2.COLOR_GRAY2BGR)
+            else:
+                autre_photo = cv2.colorChange(autre_photo, cv2.COLOR_BGR2GRAY)
 
         autre_photo = cv2.resize(autre_photo,(w,h))
 
@@ -128,7 +167,7 @@ def cadrage(image, forme='rond', couleur_fond='blanc', formes_fond=True, contour
     return image
 
 
-
+import copy
 class transforms_cadre(nn.Module):
     def __init__(self, forme=None, couleur_fond=None, formes_fond=None):
         super(transforms_cadre, self).__init__()
@@ -144,7 +183,8 @@ class transforms_cadre(nn.Module):
             
         results = torch.empty_like(batch)
         for i, image in enumerate(batch):
-            image_array = np.transpose(np.array(image), (1, 2, 0)).copy() * 255
+            image_cp = copy.copy(image)
+            image_array = np.transpose(np.array(image_cp), (1, 2, 0)) * 255
             image_array = image_array.astype(np.uint8)
 
             if self.forme is None:
@@ -162,7 +202,12 @@ class transforms_cadre(nn.Module):
             else:
                 formes_fond = self.formes_fond
 
+            
+            shape = image_array.shape
+            image_array, black_borders = remove_black_borders(image_array)
             image = cadrage(image_array, forme, couleur_fond, formes_fond)
+            image = restore_black_borders(shape, image, black_borders)
+
             image = np.transpose(image, (2, 0, 1))
             image = torch.tensor(image)
             results[i] = image/255
@@ -171,4 +216,5 @@ class transforms_cadre(nn.Module):
             results = results.squeeze(0)
         return results
     
+
 
