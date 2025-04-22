@@ -18,7 +18,6 @@ corpus = "lipade_groundtruth"
 
 processor = Blip2Processor.from_pretrained("Salesforce/blip2-flan-t5-xxl")
 model = Blip2ForConditionalGeneration.from_pretrained(root + "Salesforce/blip2-flan-t5-xxl", device_map="auto")
-model.to("cuda")
 
 x_s,_,y_s = lipade_groundtruth.getDataset(mode="similar")
 
