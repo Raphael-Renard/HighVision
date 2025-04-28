@@ -60,12 +60,12 @@ def getDataset(mode, check=False, uniform=False, writeMeta=False):
         meta = []
         metadata = pd.read_csv(metadataPath)
     else:
-        meta = ["" for _ in range(len(os.listdir(similarPath)) + len(os.listdir(uniquePath)))]
-        # with open(selectedMetadataPath, "r") as f:
-        #     meta = [" ; ".join(line.rstrip().split(";")[1:]) for line in f.readlines()]
+        with open(selectedMetadataPath, "r") as f:
+            meta = [[" ; ".join(line.rstrip().split(";")[1:]) for line in f.readlines()]]
 
     paths = []
     labels = []
+    meta_rectos = []
     labelPadding = 0
     if mode in ["similar", "all"] :
         # Load similar images
@@ -79,19 +79,33 @@ def getDataset(mode, check=False, uniform=False, writeMeta=False):
                     groups[g][i] = os.path.join(similarPath, groups[g][i] + '.jpg')
                 paths.append(groups[g][i])
                 if writeMeta:
-                    meta.append(getMetadata(metadata.loc[metadata['name'] == groups[g][i].split("/")[-1]]))
+                    meta[0].append(getMetadata(metadata.loc[metadata['name'] == groups[g][i].split("/")[-1]]))
                 labels.append(g)
         labelPadding = len(groups)
 
     if mode in ["unique", "all"] :
+        with open(absolutePath + "corpus/lipade_groundtruth/rectos.csv", 'r') as f:
+            rectos = [line.rstrip().split(';') for line in f.readlines()]
+        rectos = [(a,bool(int(b))) for (a,b) in rectos]
+        
         # Load unique images
         partial_paths = os.listdir(uniquePath)
         for index in range(len(partial_paths)):
             path = os.path.join(uniquePath, partial_paths[index])
+            file = path.split("/")[-1]
             paths.append(path)
             if writeMeta:
-                meta.append(getMetadata(metadata.loc[metadata['name'] == path.split("/")[-1]]))
+                meta[0].append(getMetadata(metadata.loc[metadata['name'] == file]))
             labels.append(labelPadding + index)
+
+            isMeta = False
+            for r_file,recto in rectos:
+                if r_file == file:
+                    meta_rectos.append(recto)
+                    isMeta = True
+                    break
+            if not isMeta:
+                meta_rectos.append(True)
 
     # Check groundtruth paths coherence
     if check:
@@ -118,9 +132,10 @@ def getDataset(mode, check=False, uniform=False, writeMeta=False):
             generatedPath = absolutePath + 'data_generation/generated/lipade_groundtruth/' + path.split('/')[-1].split('.')[0] + '.csv'
             if os.path.exists(generatedPath):
                 with open(generatedPath, 'r') as f:
-                    generatedMeta = " ; ".join([line.rstrip() for line in f.readlines()])
+                    generatedMeta = [line.rstrip().split(';') for line in f.readlines()]
                     meta[1].append(generatedMeta)
 
+        meta.append(meta_rectos)
     return paths, meta, labels # Images / Metadata / Groundtruth labels
 
 # Display
