@@ -18,7 +18,6 @@ Identification of image circulation in large collections of historical photograp
 ## 3- Data Retrieval
 ## 4- Layout Segmentation
 ## 5- Degradations
-## 5 bis- Data Generation
 ### Overview
 Simulate various types of degradations commonly found in historical photographs and printed materials. 
 
@@ -32,23 +31,34 @@ Simulate various types of degradations commonly found in historical photographs 
   - Salt-and-pepper noise
   - dirty rollers
 - **Paper Imperfections**:
-  - ink bleed
+  - bleedthrough
+  - contrast
   - crumpled paper effect
   - folded paper effect
+  - ink bleed
+  - book crease
   - scribbles
   - stains
-  - bleedthrough
   - torn paper
+ 
 - **Layout**:
   - corner overlay
   - text overlay
   - change frame shape
+  - patchwork 
+  - photomontage
 - **Human made corrections**:
   - object erased
+  - drawing effect
+  - paint effect
 
+## 5 bis- Data Generation
 ## 6- Representation
 ### Image representation
+SimCLR, Sift, Byol
+
 ### Multimodal representation
+Clip, Flava, Blip
 ## 7- Clustering
 ### Generation of clusters
 ### Evaluation of clusters

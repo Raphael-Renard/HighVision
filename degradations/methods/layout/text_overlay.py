@@ -105,7 +105,6 @@ def text_overlay(img, font_size_1=None):
                     cv2.FONT_HERSHEY_COMPLEX,font_size_1,(0,0,0),thickness_1,cv2.LINE_AA)
         cv2.putText(img,text2,(0,2*corner_height//3 + border),
                     cv2.FONT_HERSHEY_COMPLEX,font_size_2,(0,0,0),thickness_2,cv2.LINE_AA)
-        print((0,corner_height//3 + border),(0,2*corner_height//3 + 2*border))
         
     elif corner == 1: # top right corner
         img[0:corner_height, img.shape[1] - corner_width:img.shape[1]] = 255
