@@ -43,11 +43,12 @@ Simulate various types of degradations commonly found in historical photographs 
   - blue tone
   - faded effect
 - **Layout**:
-  - corner overlay
+  - corner overlay (picture_overlay)
   - text overlay
-  - change frame shape
+  - change frame shape (cadre)
   - patchwork 
   - photomontage
+  - rectangular frame around the picture (encadre_rectangle)
 - **Human made corrections**:
   - object erased
   - drawing effect
