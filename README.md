@@ -40,7 +40,8 @@ Simulate various types of degradations commonly found in historical photographs 
   - scribbles
   - stains
   - torn paper
- 
+  - blue tone
+  - faded effect
 - **Layout**:
   - corner overlay
   - text overlay
