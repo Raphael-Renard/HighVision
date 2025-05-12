@@ -3,12 +3,14 @@ flava,umap_gmm,0.585
 flava,umap_k_means,0.580
 blip2,best_threshold,0.566
 resnet50_stage4,best_threshold,0.562
+simclr_degradations,best_threshold,0.534
 clip_transfer_vitl14,best_threshold,0.533
 resnet18_stage4,best_threshold,0.523
 clip_transfer_vitl14,umap_k_means,0.501
 blip,best_threshold,0.495
 blip2,umap_k_means,0.484
 blip2,umap_gmm,0.451
+simclr_classique,best_threshold,0.449
 blip,umap_gmm,0.444
 resnet18_stage4,umap_k_means,0.411
 clip_transfer_vitl14,umap_gmm,0.407
@@ -17,14 +19,9 @@ resnet50_stage4,umap_k_means,0.404
 resnet50_stage4,umap_gmm,0.403
 resnet18_stage4,umap_gmm,0.379
 resnet18_stage3,best_threshold,0.353
-simclr_degrad_loss1_lr_50,best_threshold,0.283
 resnet50_stage3,best_threshold,0.283
-simclr_classique_loss1,best_threshold,0.283
-simclr_degrad_loss1_lr,best_threshold,0.259
-simclr_fei_loss1_lr,best_threshold,0.256
 resnet50_stage3,umap_k_means,0.250
 resnet50_stage3,umap_gmm,0.243
-simclr_fei_loss1,best_threshold,0.237
 resnet18_stage3,umap_k_means,0.215
 resnet18_stage3,umap_gmm,0.200
 sift_absolute,best_threshold,0.172
@@ -47,4 +44,3 @@ resnet50_stage2,best_threshold,0.084
 blip2_text_into_flava,umap_gmm,0.082
 blip2_text_into_flava,umap_k_means,0.078
 resnet18_stage2,best_threshold,0.062
-simclr,best_threshold,0.030
