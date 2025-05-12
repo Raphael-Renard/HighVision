@@ -36,7 +36,7 @@ Simulate various types of degradations commonly found in historical photographs 
   - crumpled paper effect
   - folded paper effect
   - ink bleed
-  - book crease
+  - book crease / picture cut in 2 parts (pliure_livre)
   - scribbles
   - stains
   - torn paper
@@ -50,7 +50,7 @@ Simulate various types of degradations commonly found in historical photographs 
   - photomontage
   - rectangular frame around the picture (encadre_rectangle)
 - **Human made corrections**:
-  - object erased
+  - object/element erased
   - drawing effect
   - paint effect
 
