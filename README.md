@@ -23,36 +23,37 @@ Simulate various types of degradations commonly found in historical photographs 
 
 ### Features
 - **Halftoning Techniques**:
-  - Atkinson dithering
-  - Floyd-Steinberg dithering
-  - Bayers threshold halftoning
+  (Different methods to do the same thing)
+  - **atkinson**: Atkinson method for dithering
+  - **floyd_steinberg**: Floyd-Steinberg method for dithering
+  - **bayers_threshold**: Bayers threshold for halftoning
 - **Noise Addition**:
-  - Gaussian noise
-  - Salt-and-pepper noise
-  - dirty rollers
+  - **gaussian_noise**: gaussian noise
+  - **salt_and_pepper**: salt-and-pepper noise (black and white pixels)
+  - **dirty_rollers**: parallel lines left by a dirty printing press
 - **Paper Imperfections**:
-  - bleedthrough
-  - contrast
-  - crumpled paper effect
-  - folded paper effect
-  - ink bleed
-  - book crease / picture cut in 2 parts (pliure_livre)
-  - scribbles
-  - stains
-  - torn paper
-  - blue tone
-  - faded effect
+  - **bleedthrough**: the ink from the other side of the paper bled through the paper
+  - **contrast**: the black and white are hightened
+  - **crumpled_paper**: crumpled paper
+  - **folded_paper**: folded paper
+  - **ink_bleed**: the ink has smudged
+  - **pliure_livre**: book crease / picture cut in 2 parts
+  - **scribbles**: pen marks
+  - **stains**: stains
+  - **torn_paper**: torn paper
+  - **blue**: blueish tone
+  - **faded**: faded effect
 - **Layout**:
-  - corner overlay (picture_overlay)
-  - text overlay
-  - change frame shape (cadre)
-  - patchwork 
-  - photomontage
-  - rectangular frame around the picture (encadre_rectangle)
+  - **picture_overlay**: overlay of another image in a corner
+  - **text_overlay**: text around or over the picture
+  - **cadre**: non-rectangular frame shape
+  - **patchwork**: parts of other pictures around 
+  - **photo_montage**: new elements pasted onto the picture
+  - **encadre_rectangle**: rectangular frame around the picture
 - **Human made corrections**:
-  - object/element erased
-  - drawing effect
-  - paint effect
+  - **erased_element**: an object/element was erased
+  - **drawing**: the picture is a drawing
+  - **paint**: the picture is a painting or has traces of paint on it
 
 ## 5 bis- Data Generation
 ## 6- Representation
