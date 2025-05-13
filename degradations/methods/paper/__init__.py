@@ -7,6 +7,8 @@ from .pliure_livre import transforms_pliure_livre
 from .scribbles import transforms_scribbles
 from .stains import transforms_stains
 from .torn_paper import transforms_torn_paper
+from .blue import transforms_blue
+from .faded import transforms_faded
 
 __all__ = ["transforms_bleedthrough", 
            "transforms_contrast", 
@@ -16,4 +18,6 @@ __all__ = ["transforms_bleedthrough",
            "transforms_pliure_livre",
            "transforms_scribbles",
            "transforms_stains",
-           "transforms_torn_paper"]
+           "transforms_torn_paper",
+           "transforms_blue",
+           "transforms_faded"]
