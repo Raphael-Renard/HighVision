@@ -295,9 +295,8 @@ class transforms_cadre(nn.Module):
             
         results = torch.empty_like(batch)
         for i, image in enumerate(batch):
-            image_cp = copy.copy(image)
-            image_array = np.transpose(np.array(image_cp), (1, 2, 0)) * 255
-            image_array = image_array.astype(np.uint8)
+            image_array = np.transpose(image.numpy(), (1, 2, 0)) * 255
+            image_array = image_array.astype(np.uint8).copy()
 
             if self.forme is None:
                 forme = random.choice(['rond', 'losange'])
