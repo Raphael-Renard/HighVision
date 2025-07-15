@@ -7,7 +7,6 @@ import sys
 import os
 import glob
 import math
-import copy
 
 
 
@@ -118,7 +117,7 @@ def add_enluminures(masque, contour, couleur_type='blanc', motif_type='croix', t
 
 
 
-def encadre_rectangle(image, couleur_fond='blanc', motif_type='random', 
+def rectangular_frame(image, couleur_fond='blanc', motif_type='random', 
                       contour_epaisseur = 33, bordures=200):
     """
     Applique un cadrage rond ou losange à une image.
@@ -193,9 +192,10 @@ def encadre_rectangle(image, couleur_fond='blanc', motif_type='random',
 
 
 
-class transforms_encadre_rectangle(nn.Module):
+import copy
+class transforms_rectangular_frame(nn.Module):
     def __init__(self, couleur_fond=None, motif_type='random', contour_epaisseur = 1, bordures=None):
-        super(transforms_encadre_rectangle, self).__init__()
+        super(transforms_rectangular_frame, self).__init__()
         self.couleur_fond = couleur_fond
         self.motif_type = motif_type
         self.contour_epaisseur = contour_epaisseur
@@ -227,7 +227,7 @@ class transforms_encadre_rectangle(nn.Module):
             
             shape = image_array.shape
             image_array, black_borders = remove_black_borders(image_array)
-            image = encadre_rectangle(image_array, couleur_fond, self.motif_type, self.contour_epaisseur, bordures)
+            image = rectangular_frame(image_array, couleur_fond, self.motif_type, self.contour_epaisseur, bordures)
             image = restore_black_borders(shape, image, black_borders)
 
             image = np.transpose(image, (2, 0, 1))
@@ -238,3 +238,4 @@ class transforms_encadre_rectangle(nn.Module):
             results = results.squeeze(0)
         return results
     
+
