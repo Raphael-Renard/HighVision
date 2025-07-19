@@ -49,12 +49,16 @@ def pdfToImage():
     jpgDir = absolutePath + 'corpus/daily_mirror/pages/'
 
     for file in tqdm(os.listdir(pdfDir)):
-        name = f"Daily_mirror_{file[11:15]}_{file[15:17]}_{file[17:19]}_p{file[26:28]}.jpg"
-        if name not in os.listdir(jpgDir):
-            image = np.array(convert_from_path(pdfDir + file)[0])
-            whiteLineFilter = np.where(np.any(image < 250, axis=(1, 2)))[0]
-            image = image[whiteLineFilter[0] : whiteLineFilter[-1] + 1]
-            Image.fromarray(image).save(jpgDir + name, 'JPEG')
+        try:
+            name = f"Daily_mirror_{file[11:15]}_{file[15:17]}_{file[17:19]}_p{file[26:28]}.jpg"
+            if name not in os.listdir(jpgDir):
+                image = np.array(convert_from_path(pdfDir + file)[0])
+                whiteLineFilter = np.where(np.any(image < 250, axis=(1, 2)))[0]
+                image = image[whiteLineFilter[0] : whiteLineFilter[-1] + 1]
+                Image.fromarray(image).save(jpgDir + name, 'JPEG')
+        except:
+            with open("corpus/daily_mirror/error.txt", "a") as f:
+                f.write(file + "\n")
 
 def getMetaData():
     jpgDir = absolutePath + 'corpus/daily_mirror/pages/'
@@ -93,7 +97,7 @@ if __name__ == '__main__':
     # downloadDataset(0)
     # downloadDataset(1)
     # downloadDataset(2)
-    # pdfToImage()
-    getMetaData()
+    pdfToImage()
+    # getMetaData()
     # x,_,_ = getDataset()
     # print(len(x), 'images')
