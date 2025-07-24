@@ -1,6 +1,10 @@
+clip_transfer_vitb32_finetuned,best_threshold,0.700
 flava,best_threshold,0.637
+clip_transfer_vitb32_finetuned,umap_k_means,0.596
 flava,umap_gmm,0.585
+clip_transfer_vitb32_finetuned,umap_gmm,0.583
 flava,umap_k_means,0.580
+clip_transfer_vitb32,best_threshold,0.568
 blip2,best_threshold,0.566
 resnet50_stage4,best_threshold,0.562
 simclr_degradations,best_threshold,0.534
@@ -9,9 +13,11 @@ resnet18_stage4,best_threshold,0.523
 clip_transfer_vitl14,umap_k_means,0.501
 blip,best_threshold,0.495
 blip2,umap_k_means,0.484
+clip_transfer_vitb32,umap_gmm,0.474
 blip2,umap_gmm,0.451
 simclr_classique,best_threshold,0.449
 blip,umap_gmm,0.444
+clip_transfer_vitb32,umap_k_means,0.444
 resnet18_stage4,umap_k_means,0.411
 clip_transfer_vitl14,umap_gmm,0.407
 blip,umap_k_means,0.406

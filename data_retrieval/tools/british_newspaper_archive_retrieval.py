@@ -115,7 +115,7 @@ class britishNewspaperArchiveExplorer():
             f.close()
 
         pages = self.pages[startIndex:]
-        limit = 5600 # https://www.britishnewspaperarchive.co.uk/content/terms_and_conditions
+        limit = 5100 + 5100 + 5900 + 5600# https://www.britishnewspaperarchive.co.uk/content/terms_and_conditions
         time_limit = 60
         refresh_time = 0.25
 
