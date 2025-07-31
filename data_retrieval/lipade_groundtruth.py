@@ -4,6 +4,7 @@ if path not in sys.path:
     sys.path.insert(0, path)
 
 import os
+import csv
 import pandas as pd
 import xml.etree.ElementTree as ET
 import langdetect
@@ -127,13 +128,13 @@ def getDataset(mode, check=False, uniform=False, writeMeta=False):
         elif mode == 'unique':
             meta[0] = meta[0][l:]
 
-        meta.append([])
-        for path in paths:
-            generatedPath = absolutePath + 'data_generation/generated/lipade_groundtruth/' + path.split('/')[-1].split('.')[0] + '.csv'
-            if os.path.exists(generatedPath):
-                with open(generatedPath, 'r') as f:
-                    generatedMeta = [line.rstrip().split(';') for line in f.readlines()]
-                    meta[1].append(generatedMeta)
+        csv_path = absolutePath + 'data_generation/generated/lipade_groundtruth.csv'
+        if os.path.exists(csv_path):
+            with open(csv_path, mode='r') as infile:
+                reader = csv.reader(infile, delimiter=';')
+                meta.append({(rows[0],rows[1]): rows[2] for rows in reader})
+        else:
+            meta.append({})
 
         meta.append(meta_rectos)
     return paths, meta, labels # Images / Metadata / Groundtruth labels
