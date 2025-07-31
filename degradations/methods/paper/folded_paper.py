@@ -8,8 +8,7 @@ import torch.nn as nn
 import torch
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../..')))
-#from absolute_path import absolutePath
-absolutePath = "C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/"
+from absolute_path import absolutePath
 
 # --- Method 1: draw fold lines on the paper ---
 
@@ -95,7 +94,7 @@ def fold_effect(img, num_folds=2, thickness=2, intensity=80):
 def folded_paper(cible, alpha=0.5):
     cible = cv2.cvtColor(cible, cv2.COLOR_BGR2GRAY)
     texture_files = glob.glob(absolutePath+"degradations/datasets/folded_texture/*")
-    texture_path = np.random.choice(texture_files)    
+    texture_path = np.random.choice(texture_files)
     texture_path = texture_path.replace("\\", "/")
     texture = cv2.imdecode(np.fromfile(texture_path, np.uint8), cv2.IMREAD_GRAYSCALE)
 
@@ -121,7 +120,7 @@ def folded_paper(cible, alpha=0.5):
     texture_resized = cv2.resize(texture_filtered, (cible.shape[1], cible.shape[0]))
 
     # Mélanger les images
-    result = cv2.addWeighted(cible.astype(int), 0.8, texture_resized.astype(int), alpha, 0)
+    result = cv2.addWeighted(cible.astype(np.uint8), 0.8, texture_resized.astype(np.uint8), alpha, 0)
     result = cv2.cvtColor(result,cv2.COLOR_GRAY2RGB)
     return result
 
@@ -155,13 +154,3 @@ class transforms_folded_paper(nn.Module):
         return results
 
 
-
-if __name__ =="__main__":
-    image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/degradations/results/2K2476_16_01.jpg"
-    #image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/Data/Sena/FRAN_0568_11AR_699/FRAN_0568_000014_L.jpg"
-    img = cv2.imread(image_path) 
-    mask = np.where(img==0)
-    img = folded_paper(img)
-    img[mask]=0
-    cv2.imshow("folded_paper_small",img)
-    cv2.waitKey(0)

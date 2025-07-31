@@ -37,7 +37,7 @@ Simulate various types of degradations commonly found in historical photographs 
   - **crumpled_paper**: crumpled paper
   - **folded_paper**: folded paper
   - **ink_bleed**: the ink has smudged
-  - **pliure_livre**: book crease / picture cut in 2 parts
+  - **book**: book crease
   - **scribbles**: pen marks
   - **stains**: stains
   - **torn_paper**: torn paper
@@ -46,10 +46,11 @@ Simulate various types of degradations commonly found in historical photographs 
 - **Layout**:
   - **picture_overlay**: overlay of another image in a corner
   - **text_overlay**: text around or over the picture
-  - **cadre**: non-rectangular frame shape
+  - **non_rectangular_frame**: adds a non-rectangular frame around the images
   - **patchwork**: parts of other pictures around 
   - **photo_montage**: new elements pasted onto the picture
-  - **encadre_rectangle**: rectangular frame around the picture
+  - **rectangular_frame**: adds a rectangular frame around the images
+  - **cut_in_two**: picture cut in 2 parts
 - **Human made corrections**:
   - **erased_element**: an object/element was erased
   - **drawing**: the picture is a drawing

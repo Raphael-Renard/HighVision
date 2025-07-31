@@ -3,7 +3,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-def pliure_livre(image, type_distorsion="asymetrique", intensite_ombre=0.8, largeur_pliure=None, amplitude=None):
+def book(image, type_distorsion="asymetrique", intensite_ombre=0.8, largeur_pliure=None, amplitude=None):
     """
     Donne un effet livre à l'image en ajoutant une ombre au milieu et une distorsion, comme 2 pages courbées.
 
@@ -76,9 +76,9 @@ def pliure_livre(image, type_distorsion="asymetrique", intensite_ombre=0.8, larg
 
 
 
-class transforms_pliure_livre(nn.Module):
+class transforms_book(nn.Module):
     def __init__(self, intensite_ombre=0.8):
-        super(transforms_pliure_livre, self).__init__()
+        super(transforms_book, self).__init__()
         self.intensite_ombre = intensite_ombre
 
     def __call__(self, batch):
@@ -91,7 +91,7 @@ class transforms_pliure_livre(nn.Module):
         for i, image in enumerate(batch):
             image_array = np.array(image).swapaxes(0,2) * 255
             type_distorsion = np.random.choice(["asymetrique", "sin", "plateau"])
-            image = pliure_livre(image_array, type_distorsion, self.intensite_ombre)
+            image = book(image_array, type_distorsion, self.intensite_ombre)
             image = np.array(image).swapaxes(0,2)
             image = torch.tensor(image)
             results[i] = image / 255
@@ -99,6 +99,4 @@ class transforms_pliure_livre(nn.Module):
         if one_image:
             results = results.squeeze(0)
         return results
-
-
 

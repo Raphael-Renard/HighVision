@@ -275,10 +275,10 @@ def cadrage(image, forme='rond', couleur_fond='blanc', formes_fond=False,
 
 
 import copy
-class transforms_cadre(nn.Module):
+class transforms_non_rectangular_frame(nn.Module):
     def __init__(self, forme=None, couleur_fond=None, formes_fond=None,
                  enluminures=True, motif_type='random', contour_epaisseur = 1, bordures=None):
-        super(transforms_cadre, self).__init__()
+        super(transforms_non_rectangular_frame, self).__init__()
         self.forme = forme
         self.couleur_fond = couleur_fond
         self.formes_fond = formes_fond
@@ -295,9 +295,8 @@ class transforms_cadre(nn.Module):
             
         results = torch.empty_like(batch)
         for i, image in enumerate(batch):
-            image_cp = copy.copy(image)
-            image_array = np.transpose(np.array(image_cp), (1, 2, 0)) * 255
-            image_array = image_array.astype(np.uint8)
+            image_array = np.transpose(image.numpy(), (1, 2, 0)) * 255
+            image_array = image_array.astype(np.uint8).copy()
 
             if self.forme is None:
                 forme = random.choice(['rond', 'losange'])
@@ -337,6 +336,3 @@ class transforms_cadre(nn.Module):
         if one_image:
             results = results.squeeze(0)
         return results
-    
-
-

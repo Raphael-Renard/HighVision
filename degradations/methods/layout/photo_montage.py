@@ -47,12 +47,11 @@ def photo_montage(img, contour_thickness=1):
     obj_bgr = obj[:, :, :3]
     alpha = obj[:, :, 3]
 
-    # Créer un masque pour le contour blanc
+    # Créer contour blanc
     kernel = np.ones((contour_thickness*2+1, contour_thickness*2+1), np.uint8)
     dilated_alpha = cv2.dilate(alpha, kernel)
     contour_mask = dilated_alpha - alpha
 
-    # Créer image contour blanc
     white_contour = np.zeros_like(obj_bgr)
     white_contour[:, :] = (255, 255, 255)
 
@@ -94,10 +93,3 @@ class transforms_photo_montage(nn.Module):
             results = results.squeeze(0)
         return results
 
-
-if __name__ == "__main__":
-    image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/degradations/results/2K2476_16_01.jpg"
-    #image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/Data/Sena/FRAN_0568_11AR_699/FRAN_0568_000014_L.jpg"
-    img = cv2.imread(image_path)
-    modified_img = photo_montage(img,1)
-    cv2.imwrite("photo_montage_ext_small.jpg", modified_img)

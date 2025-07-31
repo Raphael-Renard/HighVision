@@ -13,7 +13,7 @@ def ink_bleed(img, intensity_range=(0.4, 0.7)):
 
     inkbleed = InkBleed(intensity_range,
                     kernel_size=(5, 5),
-                    severity=(0.2, 0.4)
+                    severity=(0.5, 0.8)
                         )
 
     img_inkbleed = inkbleed(img)
@@ -47,10 +47,3 @@ class transforms_ink_bleed(nn.Module):
             results = results.squeeze(0)
         return results
 
-
-if __name__ =="__main__":
-    #image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/degradations/results/2K2476_16_01.jpg"
-    image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/Data/Sena/FRAN_0568_11AR_699/FRAN_0568_000014_L.jpg"
-    img = cv2.imread(image_path)
-    img = ink_bleed(img)
-    cv2.imwrite("ink_bleed.jpg",img)

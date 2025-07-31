@@ -6,6 +6,7 @@ import torch.nn as nn
 import cv2
 
 def faded(img):
+    img = Image.fromarray(img)
     img = ImageEnhance.Color(img).enhance(0.2)
     img = ImageEnhance.Contrast(img).enhance(0.5)
     img = ImageEnhance.Brightness(img).enhance(1.1)
@@ -16,6 +17,7 @@ def faded(img):
     voile = Image.new("RGB", img.size, (255, 255, 255))
     img = Image.blend(img, voile, alpha=0.1)
 
+    img = np.array(img)
     return img
 
 
