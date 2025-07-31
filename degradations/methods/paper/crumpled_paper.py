@@ -9,8 +9,7 @@ import sys
 import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../..')))
-#from absolute_path import absolutePath
-absolutePath = 'C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/'
+from absolute_path import absolutePath
 
 
 def generate_perlin_noise(shape, scale=200, octaves=3):
@@ -197,16 +196,3 @@ def restore_black_borders(original_shape, cropped_image, crop_coords):
     return restored_image
 
 
-
-if __name__ =="__main__":
-    image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/degradations/results/2K2476_16_01.jpg"
-    #image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/Data/Sena/FRAN_0568_11AR_699/FRAN_0568_000014_L.jpg"
-    img = cv2.imread(image_path)
-
-    shape = img.shape
-    img, black_borders = remove_black_borders(img)
-    img = crumpled_paper(img,10,0.3).astype(np.uint8)
-    img = restore_black_borders(shape, img, black_borders)
-
-    #img = crumpled_paper(img,50).astype(np.uint8)
-    cv2.imwrite("crumpled.jpg",img)
