@@ -58,11 +58,16 @@ Simulate various types of degradations commonly found in historical photographs 
 
 ## 5 bis- Data Generation
 ## 6- Representation
+### Degradation representation
+
 ### Image representation
 SimCLR, Sift, Byol
 
 ### Multimodal representation
-Clip, Flava, Blip
+Clip
+
+### Text representation
+Clip, Blip, Flava
 ## 7- Clustering
 ### Generation of clusters
 ### Evaluation of clusters
