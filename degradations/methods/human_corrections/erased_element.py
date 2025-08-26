@@ -110,10 +110,3 @@ class transforms_erased_element(nn.Module):
             results = results.squeeze(0)
         return results
 
-
-if __name__ =="__main__":
-    image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/degradations/results/2K2476_16_01.jpg"
-    #image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/Data/Sena/FRAN_0568_11AR_699/FRAN_0568_000014_L.jpg"
-    img = cv2.imread(image_path)
-    img = erased_element(img,inpaint_method="lama")
-    cv2.imwrite("erased_element_big.jpg",img)

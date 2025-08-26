@@ -103,16 +103,3 @@ class transforms_floyd_steinberg_halftoning(nn.Module):
             results = results.squeeze(0)
         return results
     
-
-if __name__ =="__main__":
-    image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/degradations/results/2K2476_16_01.jpg"
-    #image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/Data/Sena/FRAN_0568_11AR_699/FRAN_0568_000014_L.jpg"
-    img = cv2.imread(image_path)
-
-    h, w,_ = img.shape
-    if min(h, w) < 300: # Redimensionner si trop petite
-        img = floyd_small(img)
-    else:
-        img = floyd_steinberg_halftoning(img)
-    
-    cv2.imwrite("floyd.jpg",img)

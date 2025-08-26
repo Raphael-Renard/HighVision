@@ -3,7 +3,6 @@ import numpy as np
 import torch
 import copy
 import torch.nn as nn
-import cv2
 
 def faded(img):
     img = Image.fromarray(img)

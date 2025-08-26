@@ -9,27 +9,7 @@ import torch.nn as nn
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../..')))
 from absolute_path import absolutePath
-
-
-def remove_black_borders(image):
-    """Supprime les bords noirs qui ont été rajoutés pour le dataloader."""
-    # Créer un masque détectant les pixels non noirs
-    mask = np.any(image > 0, axis=2)
-    
-    # Trouver les coordonnées des pixels non noirs
-    coords = np.column_stack(np.where(mask))
-
-    if len(coords) == 0:
-        return image
-
-    # Trouver la boîte englobante des pixels non noirs
-    y_min, x_min = coords.min(axis=0)
-    y_max, x_max = coords.max(axis=0)
-
-    # Recadre image
-    cropped_image = image[y_min:y_max+1, x_min:x_max+1]
-
-    return cropped_image
+from degradations.methods.utils import remove_black_borders, restore_black_borders
 
 
 def random_partition(total, n_parts, min_frac=0.25, max_frac=0.75):

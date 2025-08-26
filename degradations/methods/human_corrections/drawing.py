@@ -10,38 +10,6 @@ from absolute_path import absolutePath
 
 
 
-
-def cartoon(img):
-    gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    height, width = gray_image.shape
-    size_factor = max(height, width) / 500
-
-    # Apply median blur to reduce noise
-    blur_ksize = int(5 * size_factor)
-    if blur_ksize % 2 == 0: blur_ksize += 1 
-    gray_blur = cv2.medianBlur(gray_image, blur_ksize)
-
-    # Détection des contours avec un seuil adaptatif
-    block_size = int(9 * size_factor)
-    if block_size % 2 == 0: block_size += 1
-    edges = cv2.adaptiveThreshold(gray_blur, 255, cv2.ADAPTIVE_THRESH_MEAN_C, 
-                                  cv2.THRESH_BINARY, block_size, 9)
-
-    # Appliquer un filtre bilatéral pour lisser l'image
-    d = int(9 * size_factor) 
-    sigma_color = int(100 * size_factor)  # Influence des couleurs voisines
-    sigma_space = int(100 * size_factor)  # Influence de l’espace
-    color_image = cv2.bilateralFilter(img, d, sigma_color, sigma_space)
-
-    cartoon = cv2.bitwise_and(color_image, color_image, mask=edges)
-    return cartoon
-
-
-
-
-
-
-
 def hed(image, with_aplat_noirs = True, with_hachures=False, flou=5):
     """
     Apply the HED algorithm to an image to obtain its edges.

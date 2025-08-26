@@ -55,9 +55,3 @@ class transforms_add_salt_and_pepper_noise(nn.Module):
             results = results.squeeze(0)
         return results
     
-if __name__ =="__main__":
-    image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/degradations/results/2K2476_16_01.jpg"
-    #image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/Data/Sena/FRAN_0568_11AR_699/FRAN_0568_000014_L.jpg"
-    img = cv2.imread(image_path)
-    img = add_salt_and_pepper_noise(img)
-    cv2.imwrite("salt_and_pepper.jpg",img)

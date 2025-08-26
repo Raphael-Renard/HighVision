@@ -109,13 +109,9 @@ def torn_paper(image, intensity=10, corner_chance=.5, max_offset=40):
     """
     Simule des bords et coins déchirés sur une image.
 
-    Args:
-        image (array): Image d'entrée (grayscale ou RGB).
-        intensity (int): Degré d'irrégularité des bords.
-        max_offset (int): Taille max des coins arrachés
-
-    Returns:
-        array: Image avec bords déchirés.
+    image (array): Image d'entrée (grayscale ou RGB).
+    intensity (int): Degré d'irrégularité des bords.
+    max_offset (int): Taille max des coins arrachés
     """
     h, w = image.shape[:2]
     mask = np.ones((h, w), dtype=np.uint8) * 255
@@ -172,14 +168,3 @@ class transforms_torn_paper(nn.Module):
             results = results.squeeze(0)
         return results
     
-
-
-if __name__ =="__main__":
-    image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/degradations/results/2K2476_16_01.jpg"
-    #image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/Data/Sena/FRAN_0568_11AR_699/FRAN_0568_000014_L.jpg"
-    img = cv2.imread(image_path)
-    shape = img.shape
-    img, black_borders = remove_black_borders(img)
-    torn_image = torn_paper(img, 250, max_offset=1000)
-    img = restore_black_borders(shape, torn_image, black_borders)
-    cv2.imwrite("torn.jpg",img)

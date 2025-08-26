@@ -105,9 +105,3 @@ class transforms_bleedthrough(nn.Module):
         return results
 
 
-if __name__ =="__main__":
-    image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/HighVision/degradations/results/2K2476_16_01.jpg"
-    #image_path = "C:/Users/rapha/Documents/Cours/Master/Stage/Data/Sena/FRAN_0568_11AR_699/FRAN_0568_000014_L.jpg"
-    img = cv2.imread(image_path)
-    img = bleedthrough(img)
-    cv2.imwrite("bleedthrough.jpg",img)
