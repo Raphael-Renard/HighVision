@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
-from clustering import getPredictionFromThreshold
+from clustering.clustering import getPredictionFromThreshold
 
 def kappa(y, predicted_y):
     TP = 0

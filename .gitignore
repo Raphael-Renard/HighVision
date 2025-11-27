@@ -14,6 +14,8 @@ representation/image/metods/logs/*
 representation/image/metods/fonts/*
 clustering/clusters/lipade_groundtruth/*
 data_generation/generated/*/*
+degradations/datasets/backgrounds/*
+degradations/corpus_degrad/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
