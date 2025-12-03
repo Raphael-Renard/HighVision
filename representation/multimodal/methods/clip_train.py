@@ -13,12 +13,12 @@ from torch.utils.data import Dataset, DataLoader
 from sklearn.model_selection import train_test_split
 import os
 
-root = os.environ['DSDIR'] + '/HuggingFace_Models/'
+root = "" #os.environ['DSDIR'] + '/HuggingFace_Models/'
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 corpus = "lipade_groundtruth"
-distancePath = "../results/distance/" + corpus + "/"
-rawPath = "../results/raw/" + corpus + "/"
-weightsPath = "../results/weights/" + corpus + "/"
+distancePath = "/home/renard/HighVision_moi/representation/multimodal/results/distance/" + corpus + "/"
+rawPath = "/home/renard/HighVision_moi/representation/multimodal/results/raw/" + corpus + "/"
+weightsPath = "/home/renard/HighVision_moi/representation/multimodal/results/weights/" + corpus + "/"
 model_save_path = "clip.pth"
 batch_size = 32
 num_epochs = 3
